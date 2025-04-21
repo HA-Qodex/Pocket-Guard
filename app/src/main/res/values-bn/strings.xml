@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Pocket Guard</string>
+    <string name="default_web_client_id">795298257858-e0fpt9e57cr72r0lho5gq6k4o8tmr10c.apps.googleusercontent.com</string>
+    <string name="greetings">পকেট গার্ডে স্বাগতম</string>
+    <string name="google_login">গুগল দিয়ে চালিয়ে যান</string>
+</resources>
