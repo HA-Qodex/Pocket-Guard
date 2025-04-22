@@ -64,6 +64,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.material)
+    // Material Icon Extended
+    implementation (libs.androidx.material.icons.extended)
     // Firebase
     implementation (platform(libs.firebase.bom))
     // Google cloud

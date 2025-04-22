@@ -1,6 +1,7 @@
 package com.my.pocketguard.view
 
 import android.app.Activity
+import android.view.Window
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -37,13 +38,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.my.pocketguard.R
 import com.my.pocketguard.navigation.AppRoutes
-import com.my.pocketguard.ui.theme.LoginButtonColor
+import com.my.pocketguard.ui.theme.ButtonColor
 import com.my.pocketguard.ui.theme.appTextStyle
 import com.my.pocketguard.viewmodel.AuthViewModel
 import kotlinx.coroutines.delay
@@ -58,6 +60,7 @@ fun SplashView(navController: NavController) {
     val offsetX = remember { Animatable(1000f) }
     val loadingOffsetX = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
+        hideStatusBar(window)
         if (currentUser.value != null) {
             delay(1500)
             val insetsController = WindowInsetsControllerCompat(window, window.decorView)
@@ -120,14 +123,14 @@ fun SplashView(navController: NavController) {
                                 0
                             )
                         },
-                        color = LoginButtonColor
+                        color = ButtonColor
                     )
                     Button(
                         modifier = Modifier
                             .padding(horizontal = 20.dp)
                             .offset { IntOffset(offsetX.value.roundToInt(), 0) },
                         colors = ButtonDefaults.buttonColors()
-                            .copy(containerColor = LoginButtonColor),
+                            .copy(containerColor = ButtonColor),
                         onClick = {
                             viewModel.handleGoogleAuth(context, navController)
                         }) {
@@ -148,4 +151,15 @@ fun SplashView(navController: NavController) {
             }
         }
     }
+}
+
+private fun hideStatusBar(window: Window){
+    // 1. Let content extend into system windows
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    // 2. Get controller and hide bars
+    val controller = WindowInsetsControllerCompat(window, window.decorView)
+    controller.hide(WindowInsetsCompat.Type.systemBars()) // hides status + nav bars
+    controller.hide(WindowInsetsCompat.Type.navigationBars()) // hides status + nav bars
+    controller.systemBarsBehavior =
+        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 }

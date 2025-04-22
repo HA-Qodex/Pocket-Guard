@@ -20,6 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun attachBaseContext(newBase: Context) {
         val localeContext = LocaleUtils.updateLocale(newBase, LanguageStorage.language)
         super.attachBaseContext(localeContext)
@@ -28,14 +29,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // 1. Let content extend into system windows
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-        // 2. Get controller and hide bars
-        val controller = WindowInsetsControllerCompat(window, window.decorView)
-        controller.hide(WindowInsetsCompat.Type.systemBars()) // hides status + nav bars
-        controller.hide(WindowInsetsCompat.Type.navigationBars()) // hides status + nav bars
-        controller.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         setContent {
             PocketGuardTheme {
                 Surface(
