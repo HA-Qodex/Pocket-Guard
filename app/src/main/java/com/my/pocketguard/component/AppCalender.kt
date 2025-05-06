@@ -1,5 +1,7 @@
 package com.my.pocketguard.component
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,11 +13,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,27 +33,41 @@ import com.my.pocketguard.ui.theme.DialogColor
 import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.ui.theme.appTextStyle
 import com.my.pocketguard.util.AppUtils.convertMillisToDate
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.util.Date
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppCalender(
-    openDialog: MutableState<Boolean>,
-    state: DatePickerState,
-    selectedDate: MutableState<Long>,
+    selectedDate: Long?,
     onDateSelected: (Long?) -> Unit,
     onDismiss: () -> Unit
 ) {
-    if (openDialog.value) {
+    val calenderState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate,
+        yearRange = ZonedDateTime.now().minusYears(10).year..ZonedDateTime.now().year,
+        initialDisplayMode = DisplayMode.Picker,
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                val date = ZonedDateTime.ofInstant(
+                    Date(utcTimeMillis).toInstant(),
+                    ZoneId.systemDefault()
+                )
+                return date in ZonedDateTime.now().minusYears(10)..ZonedDateTime.now()
+            }
+        },
+    )
+
         Dialog(
             properties = DialogProperties(
                 dismissOnBackPress = true,
                 dismissOnClickOutside = true,
                 usePlatformDefaultWidth = false,
             ),
-            onDismissRequest = {
-                state.selectedDateMillis = selectedDate.value
-                openDialog.value = false
-            }
+            onDismissRequest = onDismiss
         ) {
             Column(
                 modifier = Modifier
@@ -59,7 +77,7 @@ fun AppCalender(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 DatePicker(
-                    state = state,
+                    state = calenderState,
                     showModeToggle = false,
                     title = {
                         Text(
@@ -70,7 +88,7 @@ fun AppCalender(
                     headline = {
                         Text(
                             convertMillisToDate(
-                                state.selectedDateMillis ?: System.currentTimeMillis()
+                                calenderState.selectedDateMillis ?: System.currentTimeMillis()
                             ), modifier = Modifier.padding(start = 15.dp)
                         )
                     },
@@ -81,7 +99,6 @@ fun AppCalender(
                         headlineContentColor = TextColor,
                         selectedDayContainerColor = ButtonColor,
                         dividerColor = ButtonColor,
-//                        disabledDayContentColor = disableColor,
                         weekdayContentColor = TextColor,
                         navigationContentColor = ButtonColor,
                         yearContentColor = TextColor,
@@ -95,26 +112,8 @@ fun AppCalender(
                 Row(modifier = Modifier.fillMaxWidth().height(60.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = {
-                        selectedDate.value = state.selectedDateMillis!!
-//                        viewModel.viewModelScope.launch {
-//                            viewModel.fetchDashboard(state.selectedDateMillis!!)
-//                        }
-                        openDialog.value = false
-                    }) {
-                        Text(
-                            text = "OK",
-                            style = appTextStyle.copy(
-                                color = ButtonColor,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.W600
-                            ),
-                        )
-                    }
-                    TextButton(onClick = {
-                        state.selectedDateMillis = selectedDate.value
-                        openDialog.value = false
-                    }) {
+                    TextButton(onClick = onDismiss
+                    ) {
                         Text(
                             text = "CANCEL",
                             style = appTextStyle.copy(
@@ -124,8 +123,17 @@ fun AppCalender(
                             ),
                         )
                     }
+                    TextButton(onClick = {onDateSelected(calenderState.selectedDateMillis)}) {
+                        Text(
+                            text = "OK",
+                            style = appTextStyle.copy(
+                                color = ButtonColor,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W600
+                            ),
+                        )
+                    }
                 }
             }
         }
-    }
 }

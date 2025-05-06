@@ -23,3 +23,5 @@ val BackgroundColor = Color(0xFF0E8233)
 val BackgroundColorLite = Color(0xFFB8ECC9)
 val DialogColor = Color.White
 val TextColor = Color.Black
+val RedColor = Color.Red
+val WhiteColor = Color.White

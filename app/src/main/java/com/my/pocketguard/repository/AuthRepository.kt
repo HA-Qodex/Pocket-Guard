@@ -25,7 +25,6 @@ import com.my.pocketguard.navigation.AppRoutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.security.MessageDigest
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
@@ -128,7 +127,6 @@ class AuthRepository @Inject constructor(
             if (e is FirebaseFirestoreException) {
                 val firestoreException = e
                 val code = firestoreException.code
-
                 when (code) {
                     FirebaseFirestoreException.Code.PERMISSION_DENIED -> Log.e(
                         "FIREBASE",
