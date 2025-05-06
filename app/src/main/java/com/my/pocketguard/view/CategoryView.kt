@@ -27,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.my.pocketguard.component.AppBar
 import com.my.pocketguard.component.AppButton
+import com.my.pocketguard.component.AppDialog
 import com.my.pocketguard.component.AppTextField
 import com.my.pocketguard.component.CustomLoader
 import com.my.pocketguard.model.CategoryModel
@@ -71,25 +73,40 @@ fun CategoryView(navController: NavController) {
     val categoryTitle = remember { mutableStateOf("") }
     val supportingText = remember { mutableStateOf("") }
     val hasError = remember { mutableStateOf(false) }
-    val isLoading = remember { mutableStateOf(true) }
+    val isLoading = remember { mutableStateOf(false) }
+    val showDialog = remember { mutableStateOf(false) }
+    val dialogTitle = remember { mutableStateOf("") }
+    val dialogText = remember { mutableStateOf("") }
 
-    when (uiState) {
-        is UIState.Error -> {
-            isLoading.value = false
-        }
+    LaunchedEffect(uiState) {
 
-        is UIState.Loading -> {
-            isLoading.value = true
-        }
+        when (uiState) {
+            is UIState.Error -> {
+                isLoading.value = false
+                showDialog.value = true
+                dialogTitle.value = "Failed"
+                dialogText.value = (uiState as UIState.Error).message
+            }
 
-        is UIState.Success -> {
-            categoryTitle.value = ""
-            selectedCategoryId.value = ""
-            isLoading.value = false
+            is UIState.Loading -> {
+                isLoading.value = true
+                showDialog.value = false
+            }
+
+            is UIState.Success -> {
+                categoryTitle.value = ""
+                selectedCategoryId.value = ""
+                isLoading.value = false
+                showDialog.value = false
+            }
         }
     }
 
-    if (isLoading.value){
+    if (showDialog.value) {
+        AppDialog(title = dialogTitle.value, text = dialogText.value, confirm = "OK", showDialog = showDialog)
+    }
+
+    if (isLoading.value) {
         CustomLoader()
     }
 
@@ -101,31 +118,42 @@ fun CategoryView(navController: NavController) {
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().padding(bottom = SmallPadding)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = SmallPadding)
             ) {
                 items(categories.value) {
                     Box(
-                        modifier = Modifier.clip(RoundedCornerShape(SmallSpacing)).background(
-                            if(selectedCategoryId.value == it.id.toString())
-                                BackgroundColor
-                                else BackgroundColorLite).clickable{
-                            if(selectedCategoryId.value != it.id.toString()){
-                            selectedCategoryId.value = it.id.toString()
-                            categoryTitle.value = it.categoryName.toString().replaceFirstChar {
-                                it.uppercase()
-                            }
-                            } else {
-                                selectedCategoryId.value = ""
-                                categoryTitle.value = ""
-                            }
-                        },
-                        contentAlignment = Alignment.Center) {
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(SmallSpacing))
+                            .background(
+                                if (selectedCategoryId.value == it.id.toString())
+                                    BackgroundColor
+                                else BackgroundColorLite
+                            )
+                            .clickable {
+                                if (selectedCategoryId.value != it.id.toString()) {
+                                    selectedCategoryId.value = it.id.toString()
+                                    categoryTitle.value =
+                                        it.categoryName.toString().replaceFirstChar {
+                                            it.uppercase()
+                                        }
+                                } else {
+                                    selectedCategoryId.value = ""
+                                    categoryTitle.value = ""
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             modifier = Modifier.padding(SmallSpacing),
                             text = it.categoryName.toString().replaceFirstChar {
                                 it.uppercase()
                             },
-                            style = appTextStyle.copy(fontWeight = FontWeight.Bold, color =  if(selectedCategoryId.value == it.id.toString()) WhiteColor else TextColor)
+                            style = appTextStyle.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = if (selectedCategoryId.value == it.id.toString()) WhiteColor else TextColor
+                            )
                         )
                     }
                 }
@@ -162,14 +190,14 @@ fun CategoryView(navController: NavController) {
                 if (categoryTitle.value.isEmpty()) {
                     hasError.value = true
                     supportingText.value = "Please enter category name"
-                }else {
+                } else {
                     if (selectedCategoryId.value == "") {
                         viewModel.storeCategory(categoryTitle.value)
                     } else {
                         viewModel.updateCategory(selectedCategoryId.value, categoryTitle.value)
                     }
                 }
-            }, text = if(selectedCategoryId.value != "") "Update" else "Submit")
+            }, text = if (selectedCategoryId.value != "") "Update" else "Submit")
         }
     }
 }

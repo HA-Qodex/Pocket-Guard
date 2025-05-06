@@ -46,6 +46,8 @@ class CategoryRepository @Inject constructor(
                                 Log.d("CATEGORY", "Failed to add category")
                             }
                         }
+                } else {
+                    _uiState.value = UIState.Error("Category already exists")
                 }
             }
         } catch (e: Exception){
@@ -62,12 +64,15 @@ class CategoryRepository @Inject constructor(
                     store.collection("categories").document(id).update(categoryData)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
+                                _uiState.value = UIState.Success
                                 Log.d("CATEGORY", "Successfully updated category.")
                             } else {
+                                _uiState.value = UIState.Error("Failed to update category")
                                 Log.d("CATEGORY", "Failed to update category")
                             }
                         }
         } catch (e: Exception){
+            _uiState.value = UIState.Error(e.message.toString())
             Log.e("CATEGORY", "Category error", e)
         }
     }
@@ -77,6 +82,7 @@ class CategoryRepository @Inject constructor(
         val userId = firebaseAuth.currentUser?.uid
         listenerRegistration = store.collection("categories").whereEqualTo("created_by", userId).orderBy("category_name", Query.Direction.ASCENDING)
         .addSnapshotListener { snapshot, e ->
+            Log.d("FIRESTORE", "fetchCategory: $e")
             if(e != null){
                 _uiState.value = UIState.Error(e.message.toString())
                 return@addSnapshotListener
