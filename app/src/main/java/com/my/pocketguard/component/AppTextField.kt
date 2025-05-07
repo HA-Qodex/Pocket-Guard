@@ -2,6 +2,7 @@ package com.my.pocketguard.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,7 +49,6 @@ fun AppTextField(
         shape = RoundedCornerShape(SmallSpacing),
         trailingIcon = trailingIcon,
         leadingIcon = leadingIcon,
-//        label = { Text(label, style = appTextStyle.copy(fontSize = 12.sp, fontWeight = FontWeight.W400)) },
         placeholder = {
             if (textAlign != TextAlign.Center) {
                 Text(label, style = appTextStyle.copy(fontWeight = FontWeight.W400))
@@ -83,6 +83,7 @@ fun AppTextField(
         supportingText = {
             if (supportingText != "") Text(
                 supportingText,
+                modifier = modifier.padding(bottom = SmallSpacing),
                 style = appTextStyle.copy(color = RedColor, fontSize = SmallText)
             ) else null
         }

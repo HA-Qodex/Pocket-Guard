@@ -28,6 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.my.pocketguard.component.DashboardAppBar
 import com.my.pocketguard.component.AppCalender
+import com.my.pocketguard.component.CategoryBottomSheet
 import com.my.pocketguard.component.FundBottomSheet
 import com.my.pocketguard.model.UserModel
 import com.my.pocketguard.navigation.AppRoutes
@@ -46,7 +47,9 @@ fun DashboardView(navController: NavController) {
     val currentUser = viewModel.currentUser.collectAsState()
     val users by viewModel.users.collectAsState()
     val fundSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val categorySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showFundSheet = remember { mutableStateOf(false) }
+    var showCategorySheet = remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     var showDatePicker = remember { mutableStateOf(false) }
 
@@ -56,6 +59,11 @@ fun DashboardView(navController: NavController) {
     if (showFundSheet.value) {
         FundBottomSheet(showBottomSheet = showFundSheet, sheetState = fundSheetState)
     }
+
+    if (showCategorySheet.value) {
+        CategoryBottomSheet(showBottomSheet = showCategorySheet, sheetState = categorySheetState)
+    }
+
     if (showDatePicker.value) {
         AppCalender(
             selectedDate = selectedDate,
@@ -76,10 +84,12 @@ fun DashboardView(navController: NavController) {
                 context = context,
                 imageUrl = currentUser.value?.photoUrl.toString(),
                 name = currentUser.value?.displayName.toString(),
-                fundClick = { navController.navigate(AppRoutes.FUND.route) },
+                fundClick = { showFundSheet.value = true },
+//                    navController.navigate(AppRoutes.FUND.route) },
                 addClick = { showDatePicker.value = true },
                 categoryClick = {
-                    navController.navigate(AppRoutes.CATEGORY.route)
+                    showCategorySheet.value = true
+//                    navController.navigate(AppRoutes.CATEGORY.route)
                 }
             )
         }

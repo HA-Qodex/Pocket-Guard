@@ -65,7 +65,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FundBottomSheet(
+fun ExpenseBottomSheet(
     sheetState: SheetState,
     showBottomSheet: MutableState<Boolean>
 ) {

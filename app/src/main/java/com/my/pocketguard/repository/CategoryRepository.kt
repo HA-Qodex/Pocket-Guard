@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.my.pocketguard.model.CategoryModel
+import com.my.pocketguard.services.FirestoreService
 import com.my.pocketguard.util.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 class CategoryRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val store: FirebaseFirestore
+    private val store: FirebaseFirestore,
+    private val firestoreService: FirestoreService
 ) {
     private val _uiState = MutableStateFlow<UIState>(UIState.Loading)
     val uiState: StateFlow<UIState> get() = _uiState
@@ -77,9 +79,21 @@ class CategoryRepository @Inject constructor(
         }
     }
 
+    suspend fun fetchNewCategory(){
+        _uiState.value = UIState.Loading
+        try {
+            firestoreService.fetchCategory().collect {
+                _categories.value = it
+                _uiState.value = UIState.Success
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error(e.message.toString())
+        }
+    }
 
     fun fetchCategory(){
         val userId = firebaseAuth.currentUser?.uid
+        try {
         listenerRegistration = store.collection("categories").whereEqualTo("created_by", userId).orderBy("category_name", Query.Direction.ASCENDING)
         .addSnapshotListener { snapshot, e ->
             Log.d("FIRESTORE", "fetchCategory: $e")
@@ -93,6 +107,10 @@ class CategoryRepository @Inject constructor(
                 _uiState.value = UIState.Success
                 _categories.value = categories
             }
+        }
+        } catch (e: Exception){
+            _uiState.value = UIState.Error(e.message.toString())
+            Log.e("CATEGORY", "Category fetch error", e)
         }
     }
 
