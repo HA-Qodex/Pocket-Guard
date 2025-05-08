@@ -1,7 +1,5 @@
 package com.my.pocketguard.view
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,18 +24,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.my.pocketguard.component.DashboardAppBar
 import com.my.pocketguard.component.AppCalender
 import com.my.pocketguard.component.CategoryBottomSheet
+import com.my.pocketguard.component.DashboardAppBar
 import com.my.pocketguard.component.FundBottomSheet
-import com.my.pocketguard.model.UserModel
 import com.my.pocketguard.navigation.AppRoutes
 import com.my.pocketguard.ui.theme.BackgroundColor
 import com.my.pocketguard.ui.theme.BackgroundColorLite
 import com.my.pocketguard.util.UIState
 import com.my.pocketguard.viewmodel.DashboardViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardView(navController: NavController) {
@@ -86,7 +82,7 @@ fun DashboardView(navController: NavController) {
                 name = currentUser.value?.displayName.toString(),
                 fundClick = { showFundSheet.value = true },
 //                    navController.navigate(AppRoutes.FUND.route) },
-                addClick = { showDatePicker.value = true },
+                addClick = { navController.navigate(AppRoutes.EXPENSE.route) },
                 categoryClick = {
                     showCategorySheet.value = true
 //                    navController.navigate(AppRoutes.CATEGORY.route)

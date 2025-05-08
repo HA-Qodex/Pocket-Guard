@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.34.0"
-agp = "8.9.2"
+agp = "8.10.0"
 coilCompose = "2.6.0"
 converterGson = "2.11.0"
 credentials = "1.5.0"

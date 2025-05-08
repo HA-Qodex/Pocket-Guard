@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.my.pocketguard.model.FundModel
+import com.my.pocketguard.services.FirestoreService
 import com.my.pocketguard.util.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,8 @@ import javax.inject.Inject
 
 class FundRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val store: FirebaseFirestore
+    private val store: FirebaseFirestore,
+    private val firestoreService: FirestoreService
 ) {
     private val _uiState = MutableStateFlow<UIState>(UIState.Loading)
     val uiState: StateFlow<UIState> get() = _uiState
@@ -33,6 +35,7 @@ class FundRepository @Inject constructor(
             "id" to uid,
             "fund_name" to fundName,
             "fund_amount" to amount,
+            "remaining_amount" to amount,
             "created_by" to userId,
             "created_at" to FieldValue.serverTimestamp()
         )
@@ -95,27 +98,15 @@ class FundRepository @Inject constructor(
 //        }
 //    }
 
-    fun fetchFund() {
-        val userId = firebaseAuth.currentUser?.uid
+    suspend fun fetchFund() {
+        _uiState.value = UIState.Loading
         try {
-        listenerRegistration = store.collection("funds").whereEqualTo("created_by", userId)
-            .orderBy("fund_name", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, e ->
-                if (e != null) {
-                    _uiState.value = UIState.Error(e.message.toString())
-                    Log.e("FUNDS", e.message.toString())
-                    return@addSnapshotListener
-                }
-
-                if (snapshot != null) {
-                    val funds = snapshot.toObjects(FundModel::class.java)
-                    _uiState.value = UIState.Success
-                    _funds.value = funds
-                }
+            firestoreService.fetchFunds().collect {
+                _funds.value = it
+                _uiState.value = UIState.Success
             }
-        } catch (e: Exception){
+        } catch (e: Exception) {
             _uiState.value = UIState.Error(e.message.toString())
-            Log.e("FUNDS", "Fund fetch error", e)
         }
     }
 

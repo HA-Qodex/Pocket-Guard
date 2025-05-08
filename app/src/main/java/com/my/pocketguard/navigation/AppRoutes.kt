@@ -5,6 +5,7 @@ sealed class AppRoutes(
 ) {
     data object SPLASH : AppRoutes("splash")
     data object DASHBOARD : AppRoutes("dashboard")
+    data object EXPENSE : AppRoutes("expense")
     data object FUND : AppRoutes("fund")
     data object CATEGORY : AppRoutes("category")
 }

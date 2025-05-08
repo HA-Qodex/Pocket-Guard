@@ -4,6 +4,9 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.my.pocketguard.model.CategoryModel
+import com.my.pocketguard.model.FundModel
+import com.my.pocketguard.services.FirestoreService
 import com.my.pocketguard.util.UIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,36 +15,40 @@ import javax.inject.Inject
 
 class ExpenseRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val store: FirebaseFirestore
+    private val store: FirebaseFirestore,
+    private val firestoreService: FirestoreService
 ) {
     private val _uiState = MutableStateFlow<UIState>(UIState.Loading)
     val uiState: StateFlow<UIState> get() = _uiState
 
-//    fun storeExpense(expenseName: String) {
-//        _uiState.value = UIState.Loading
-//        val userId = firebaseAuth.currentUser?.uid
-//        val uid = UUID.randomUUID().toString()
-//        val expenseData = hashMapOf(
-//            "id" to uid,
-//            "expense_title" to expenseName,
-//            "expense_date" to expenseName,
-//            "expense_amount" to expenseName,
-//            "expense_id" to categoryId,
-//            "fund_id" to fundId,
-//            "user_id" to userId,
-//            "created_at" to FieldValue.serverTimestamp()
-//        )
-//        try {
-//            store.collection("expenses").document(uid).set(expenseData)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        Log.d("EXPENSES", "Successfully added expense.")
-//                    } else {
-//                        Log.d("EXPENSES", "Failed to add expense")
-//                    }
-//                }
-//        } catch (e: Exception) {
-//            Log.e("EXPENSES", "Expense error", e)
-//        }
-//    }
+    private val _categories = MutableStateFlow<List<CategoryModel>>(emptyList())
+    val categories: StateFlow<List<CategoryModel>> get() = _categories
+
+    private val _funds = MutableStateFlow<List<FundModel>>(emptyList())
+    val funds: StateFlow<List<FundModel>> get() = _funds
+
+    suspend fun fetchCategory(){
+        _uiState.value = UIState.Loading
+        try {
+            firestoreService.fetchCategory().collect {
+                _categories.value = it
+                _uiState.value = UIState.Success
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error(e.message.toString())
+        }
+    }
+
+    suspend fun fetchFunds(){
+        _uiState.value = UIState.Loading
+        try {
+            firestoreService.fetchFunds().collect {
+                _funds.value = it
+                Log.d("FIRESTORE", "fetchFunds: $it")
+                _uiState.value = UIState.Success
+            }
+        } catch (e: Exception) {
+            _uiState.value = UIState.Error(e.message.toString())
+        }
+    }
 }

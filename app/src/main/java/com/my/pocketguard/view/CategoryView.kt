@@ -68,7 +68,6 @@ fun CategoryView(navController: NavController) {
     val dialogText = remember { mutableStateOf("") }
 
     LaunchedEffect(uiState) {
-
         when (uiState) {
             is UIState.Error -> {
                 isLoading.value = false

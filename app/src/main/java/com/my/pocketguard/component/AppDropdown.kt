@@ -19,6 +19,7 @@ import com.my.pocketguard.ui.theme.appTextStyle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> AppDropdown(
+    modifier: Modifier = Modifier,
     title: String,
     selectedItem: T?,
     items: List<T>,
@@ -29,13 +30,13 @@ fun <T> AppDropdown(
     var isExpended = remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
+        modifier = modifier,
         expanded = isExpended.value,
         onExpandedChange = {
             isExpended.value = !isExpended.value
         }) {
         AppDisableTextField(
-            modifier = Modifier
-                .fillMaxWidth().menuAnchor(MenuAnchorType.PrimaryEditable, true),
+            modifier = modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true),
             value = (selectedItem?.let(itemLabel) ?: "").toString(),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpended.value)
