@@ -18,8 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
+import com.my.pocketguard.ui.theme.PrimaryColorLite
 import com.my.pocketguard.ui.theme.ButtonColor
 import com.my.pocketguard.ui.theme.appTextStyle
 
@@ -29,7 +28,7 @@ fun CustomLoader(
     Dialog(onDismissRequest = { }) {
         Box(
             modifier = Modifier
-                .background(color = BackgroundColorLite, shape = RoundedCornerShape(8.dp))
+                .background(color = PrimaryColorLite, shape = RoundedCornerShape(8.dp))
                 .width(150.dp)
                 .height(130.dp)
                 .border(width = 1.dp,shape = RoundedCornerShape(8.dp),color = ButtonColor),

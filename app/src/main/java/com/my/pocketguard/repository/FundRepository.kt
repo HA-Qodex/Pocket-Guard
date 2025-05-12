@@ -46,7 +46,7 @@ class FundRepository @Inject constructor(
                     store.collection("funds").document(uid).set(fundData)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                _uiState.value = UIState.Success
+                                _uiState.value = UIState.Success()
                                 Log.d("FUNDS", "Successfully added fund.")
                             } else {
                                 _uiState.value = UIState.Error("Failed to update fund")
@@ -62,7 +62,7 @@ class FundRepository @Inject constructor(
                         .update(updateFundData)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                _uiState.value = UIState.Success
+                                _uiState.value = UIState.Success()
                                 Log.d("FUNDS", "Successfully updated fund.")
                             } else {
                                 _uiState.value = UIState.Error("Failed to update fund")
@@ -76,34 +76,12 @@ class FundRepository @Inject constructor(
         }
     }
 
-//    fun updateFund(id: String, fundName: String) {
-//        _uiState.value = UIState.Loading
-//        val fundData = mapOf(
-//            "fund_name" to fundName,
-//        )
-//        try {
-//            store.collection("funds").document(id).update(fundData)
-//                .addOnCompleteListener { task ->
-//                    if (task.isSuccessful) {
-//                        _uiState.value = UIState.Success
-//                        Log.d("FUNDS", "Successfully updated fund.")
-//                    } else {
-//                        _uiState.value = UIState.Error("Failed to update fund")
-//                        Log.d("FUNDS", "Failed to update fund")
-//                    }
-//                }
-//        } catch (e: Exception) {
-//            _uiState.value = UIState.Error(e.message.toString())
-//            Log.e("FUNDS", "Fund error", e)
-//        }
-//    }
-
     suspend fun fetchFund() {
         _uiState.value = UIState.Loading
         try {
             firestoreService.fetchFunds().collect {
                 _funds.value = it
-                _uiState.value = UIState.Success
+                _uiState.value = UIState.Success()
             }
         } catch (e: Exception) {
             _uiState.value = UIState.Error(e.message.toString())

@@ -1,6 +1,5 @@
 package com.my.pocketguard.component
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,13 +41,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
-import com.my.pocketguard.ui.theme.Dimension.LargePadding
+import com.my.pocketguard.ui.theme.PrimaryColor
+import com.my.pocketguard.ui.theme.PrimaryColorLite
+import com.my.pocketguard.ui.theme.Dimension.SizeL
 import com.my.pocketguard.ui.theme.Dimension.LargeText
-import com.my.pocketguard.ui.theme.Dimension.MediumPadding
-import com.my.pocketguard.ui.theme.Dimension.SmallPadding
-import com.my.pocketguard.ui.theme.Dimension.SmallSpacing
+import com.my.pocketguard.ui.theme.Dimension.SizeM
+import com.my.pocketguard.ui.theme.Dimension.SizeS
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
 import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.ui.theme.WhiteColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -114,7 +113,7 @@ fun CategoryBottomSheet(
         sheetState = sheetState,
         containerColor = Color.White,
         dragHandle = {
-            Row(modifier = Modifier.padding(vertical = SmallPadding), verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.padding(vertical = SizeS), verticalAlignment = Alignment.CenterVertically) {
                 HorizontalDivider(
                     modifier = Modifier
                         .width(30.dp)
@@ -123,7 +122,7 @@ fun CategoryBottomSheet(
                 )
                 Text(
                     "CATEGORIES",
-                    modifier = Modifier.padding(horizontal = SmallSpacing),
+                    modifier = Modifier.padding(horizontal = SizeXS),
                     style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = LargeText)
                 )
                 HorizontalDivider(
@@ -138,22 +137,22 @@ fun CategoryBottomSheet(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = LargePadding)
+                .padding(horizontal = SizeL)
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = MediumPadding, top = SmallPadding)
+                    .padding(bottom = SizeM, top = SizeS)
             ) {
                 items(categories.value) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(SmallSpacing))
+                            .clip(RoundedCornerShape(SizeXS))
                             .background(
                                 if (selectedCategoryId.value == it.id.toString())
-                                    BackgroundColor
-                                else BackgroundColorLite
+                                    PrimaryColor
+                                else PrimaryColorLite
                             )
                             .clickable {
                                 if (selectedCategoryId.value != it.id.toString()) {
@@ -170,7 +169,7 @@ fun CategoryBottomSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            modifier = Modifier.padding(SmallSpacing),
+                            modifier = Modifier.padding(SizeXS),
                             text = it.categoryName.toString().replaceFirstChar {
                                 it.uppercase()
                             },
@@ -197,7 +196,7 @@ fun CategoryBottomSheet(
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Category,
-                        tint = BackgroundColor,
+                        tint = PrimaryColor,
                         contentDescription = "category", modifier = Modifier.size(25.dp)
                     )
                 },

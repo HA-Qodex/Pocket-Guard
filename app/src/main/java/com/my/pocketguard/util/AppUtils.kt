@@ -1,7 +1,14 @@
 package com.my.pocketguard.util
 
 import android.annotation.SuppressLint
-import androidx.navigation.NavController
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
+import com.my.pocketguard.ui.theme.Dimension.SmallText
+import com.my.pocketguard.ui.theme.RedColor
+import com.my.pocketguard.ui.theme.appTextStyle
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -18,10 +25,13 @@ object AppUtils {
         val formatter = SimpleDateFormat("dd MMM, yyyy")
         return formatter.format(Date(millis))
     }
+
+    const val SUCCESSFUL = "Successful"
+    const val FAILED = "Failed"
 }
 
 sealed class UIState{
     object Loading: UIState()
-    object Success: UIState()
+    data class Success(val tag: String = "DEFAULT"): UIState()
     data class Error(val message: String): UIState()
 }

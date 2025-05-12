@@ -41,11 +41,11 @@ import com.my.pocketguard.component.AppDialog
 import com.my.pocketguard.component.AppTextField
 import com.my.pocketguard.component.CustomLoader
 import com.my.pocketguard.navigation.AppRoutes
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
-import com.my.pocketguard.ui.theme.Dimension.LargePadding
-import com.my.pocketguard.ui.theme.Dimension.SmallPadding
-import com.my.pocketguard.ui.theme.Dimension.SmallSpacing
+import com.my.pocketguard.ui.theme.PrimaryColor
+import com.my.pocketguard.ui.theme.PrimaryColorLite
+import com.my.pocketguard.ui.theme.Dimension.SizeL
+import com.my.pocketguard.ui.theme.Dimension.SizeS
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
 import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.ui.theme.WhiteColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -102,22 +102,22 @@ fun CategoryView(navController: NavController) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(horizontal = LargePadding)
+                .padding(horizontal = SizeL)
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = SmallPadding)
+                    .padding(bottom = SizeS)
             ) {
                 items(categories.value) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(SmallSpacing))
+                            .clip(RoundedCornerShape(SizeXS))
                             .background(
                                 if (selectedCategoryId.value == it.id.toString())
-                                    BackgroundColor
-                                else BackgroundColorLite
+                                    PrimaryColor
+                                else PrimaryColorLite
                             )
                             .clickable {
                                 if (selectedCategoryId.value != it.id.toString()) {
@@ -134,7 +134,7 @@ fun CategoryView(navController: NavController) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            modifier = Modifier.padding(SmallSpacing),
+                            modifier = Modifier.padding(SizeXS),
                             text = it.categoryName.toString().replaceFirstChar {
                                 it.uppercase()
                             },
@@ -161,7 +161,7 @@ fun CategoryView(navController: NavController) {
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Category,
-                        tint = BackgroundColor,
+                        tint = PrimaryColor,
                         contentDescription = "category", modifier = Modifier.size(25.dp)
                     )
                 },

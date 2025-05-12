@@ -15,13 +15,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
-import com.my.pocketguard.ui.theme.Dimension.SmallSpacing
+import com.my.pocketguard.ui.theme.PrimaryColor
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
 import com.my.pocketguard.ui.theme.Dimension.SmallText
 import com.my.pocketguard.ui.theme.RedColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -33,6 +30,7 @@ fun AppTextField(
     textAlign: TextAlign = TextAlign.Start,
     label: String,
     value: String,
+    maxLines: Int = 1,
     onValueChange: (String) -> Unit,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -46,22 +44,25 @@ fun AppTextField(
         modifier = modifier,
         value = value,
         onValueChange = onValueChange,
-        shape = RoundedCornerShape(SmallSpacing),
+        shape = RoundedCornerShape(SizeXS),
         trailingIcon = trailingIcon,
+        singleLine = maxLines == 1,
+        maxLines = maxLines,
         leadingIcon = leadingIcon,
         placeholder = {
             if (textAlign != TextAlign.Center) {
-                Text(label, style = appTextStyle.copy(fontWeight = FontWeight.W400))
+                Text(label, style = appTextStyle)
             } else {
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(label, style = appTextStyle.copy(fontWeight = FontWeight.W400))
+                    Text(label, style = appTextStyle)
                 }
             }
         },
-        textStyle = appTextStyle.copy(fontWeight = FontWeight.W400, textAlign = textAlign),
+        label = { Text(label) },
+        textStyle = appTextStyle.copy(textAlign = textAlign),
         keyboardOptions = keyboardOptions,
         keyboardActions = KeyboardActions(
             onDone = { focusManager.clearFocus() }
@@ -69,21 +70,21 @@ fun AppTextField(
         visualTransformation = visualTransformation,
         colors = OutlinedTextFieldDefaults.colors(
             selectionColors = TextSelectionColors(
-                handleColor = BackgroundColor,
-                backgroundColor = BackgroundColor.copy(alpha = 0.4f)
+                handleColor = PrimaryColor,
+                backgroundColor = PrimaryColor.copy(alpha = 0.4f)
             ),
-            cursorColor = BackgroundColor,
-//            focusedContainerColor = BackgroundColorLite,
-            focusedBorderColor = BackgroundColor,
-            unfocusedBorderColor = BackgroundColor,
+            cursorColor = PrimaryColor,
+            focusedLabelColor = PrimaryColor,
+            focusedBorderColor = PrimaryColor,
+            unfocusedBorderColor = PrimaryColor,
             unfocusedContainerColor = Color.Transparent,
             errorBorderColor = RedColor
         ),
         isError = isError,
         supportingText = {
-            if (supportingText != "") Text(
+            if (isError) Text(
                 supportingText,
-                modifier = modifier.padding(bottom = SmallSpacing),
+                modifier = modifier.padding(bottom = SizeXS),
                 style = appTextStyle.copy(color = RedColor, fontSize = SmallText)
             ) else null
         }

@@ -5,15 +5,11 @@ import androidx.compose.ui.unit.sp
 
 object Dimension {
 
-    // Padding
-    val SmallPadding = 10.dp
-    val MediumPadding = 15.dp
-    val LargePadding = 20.dp
-
-    // Spacing
-    val SmallSpacing = 5.dp
-    val MediumSpacing = 12.dp
-    val LargeSpacing = 24.dp
+    // Size
+    val SizeXS = 5.dp
+    val SizeS = 10.dp
+    val SizeM = 15.dp
+    val SizeL = 20.dp
 
     // Font sizes
     val SmallText = 12.sp

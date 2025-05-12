@@ -1,5 +1,6 @@
 package com.my.pocketguard.view
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,18 +20,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.my.pocketguard.component.AppCalender
 import com.my.pocketguard.component.CategoryBottomSheet
 import com.my.pocketguard.component.DashboardAppBar
 import com.my.pocketguard.component.FundBottomSheet
 import com.my.pocketguard.navigation.AppRoutes
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
+import com.my.pocketguard.ui.theme.PrimaryColor
+import com.my.pocketguard.ui.theme.PrimaryColorLite
 import com.my.pocketguard.util.UIState
 import com.my.pocketguard.viewmodel.DashboardViewModel
 
@@ -42,12 +42,12 @@ fun DashboardView(navController: NavController) {
     val uiState by viewModel.uiState.collectAsState()
     val currentUser = viewModel.currentUser.collectAsState()
     val users by viewModel.users.collectAsState()
+    val expenses by viewModel.expenseList.collectAsState()
     val fundSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val categorySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showFundSheet = remember { mutableStateOf(false) }
     var showCategorySheet = remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    var showDatePicker = remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
     }
@@ -60,21 +60,8 @@ fun DashboardView(navController: NavController) {
         CategoryBottomSheet(showBottomSheet = showCategorySheet, sheetState = categorySheetState)
     }
 
-    if (showDatePicker.value) {
-        AppCalender(
-            selectedDate = selectedDate,
-            onDateSelected = {
-                selectedDate = it
-                showDatePicker.value = false
-            },
-            onDismiss = {
-                showDatePicker.value = false
-            }
-        )
-    }
-
     Scaffold(
-        containerColor = BackgroundColorLite,
+        containerColor = PrimaryColorLite,
         topBar = {
             DashboardAppBar(
                 context = context,
@@ -99,26 +86,15 @@ fun DashboardView(navController: NavController) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(BackgroundColor)
+                        .background(PrimaryColor)
                 ) {
-                    when (uiState) {
-                        is UIState.Loading -> {
-                            CircularProgressIndicator()
-                        }
-
-                        is UIState.Success -> {
-                            LazyColumn {
-                                items(users) {
-                                    Text(it.name.toString())
-                                }
-                            }
-                        }
-
-                        is UIState.Error -> {
-                            Text(text = (uiState as UIState.Error).message)
+                    LazyColumn(modifier = Modifier.padding(horizontal = 20.dp)) {
+                        items(expenses) {
+                            Text(it.category?.categoryName.toString())
+                            Text(it.amount.toString())
+                            Text("${it.fund?.fundName} || ${it.fund?.remainingAmount}".toString())
                         }
                     }
-
                 }
             }
         }

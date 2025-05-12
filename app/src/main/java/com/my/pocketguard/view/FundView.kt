@@ -32,7 +32,7 @@ import com.my.pocketguard.component.AppBar
 import com.my.pocketguard.component.AppTextField
 import com.my.pocketguard.navigation.AppRoutes
 import com.my.pocketguard.ui.theme.ButtonColor
-import com.my.pocketguard.ui.theme.Dimension.LargePadding
+import com.my.pocketguard.ui.theme.Dimension.SizeL
 import com.my.pocketguard.ui.theme.appTextStyle
 
 @Composable
@@ -42,7 +42,7 @@ fun FundView(navController: NavController) {
     val focusManager = LocalFocusManager.current
 
     Scaffold(topBar = { AppBar(navController, "Fund", route = AppRoutes.DASHBOARD.route) }) {
-        Column(modifier = Modifier.padding(it).padding(horizontal = LargePadding)) {
+        Column(modifier = Modifier.padding(it).padding(horizontal = SizeL)) {
             AppTextField(
                 modifier = Modifier
                     .fillMaxWidth(),

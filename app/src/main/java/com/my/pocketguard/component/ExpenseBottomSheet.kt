@@ -1,6 +1,5 @@
 package com.my.pocketguard.component
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -46,15 +44,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.my.pocketguard.ui.theme.BackgroundColor
-import com.my.pocketguard.ui.theme.BackgroundColorLite
-import com.my.pocketguard.ui.theme.Dimension.LargePadding
+import com.my.pocketguard.ui.theme.PrimaryColor
+import com.my.pocketguard.ui.theme.PrimaryColorLite
+import com.my.pocketguard.ui.theme.Dimension.SizeL
 import com.my.pocketguard.ui.theme.Dimension.LargeText
-import com.my.pocketguard.ui.theme.Dimension.MediumPadding
-import com.my.pocketguard.ui.theme.Dimension.RegularText
-import com.my.pocketguard.ui.theme.Dimension.SmallPadding
-import com.my.pocketguard.ui.theme.Dimension.SmallSpacing
-import com.my.pocketguard.ui.theme.Dimension.SmallText
+import com.my.pocketguard.ui.theme.Dimension.SizeM
+import com.my.pocketguard.ui.theme.Dimension.SizeS
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
 import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.ui.theme.WhiteColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -83,7 +79,6 @@ fun ExpenseBottomSheet(
     val dialogText = remember { mutableStateOf("") }
 
     LaunchedEffect(uiState) {
-        Log.d("CATEGORY_SHEET", "LaunchedEffect called")
         when (uiState) {
             is UIState.Error -> {
                 isLoading.value = false
@@ -128,7 +123,7 @@ fun ExpenseBottomSheet(
         containerColor = Color.White,
         dragHandle = {
             Row(
-                modifier = Modifier.padding(vertical = SmallPadding),
+                modifier = Modifier.padding(vertical = SizeS),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 HorizontalDivider(
@@ -139,7 +134,7 @@ fun ExpenseBottomSheet(
                 )
                 Text(
                     "FUNDS",
-                    modifier = Modifier.padding(horizontal = SmallSpacing),
+                    modifier = Modifier.padding(horizontal = SizeXS),
                     style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = LargeText)
                 )
                 HorizontalDivider(
@@ -154,22 +149,22 @@ fun ExpenseBottomSheet(
     ) {
         Column(
             modifier = Modifier
-                .padding(horizontal = LargePadding)
+                .padding(horizontal = SizeL)
         ) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = MediumPadding, top = SmallPadding)
+                    .padding(bottom = SizeM, top = SizeS)
             ) {
                 items(funds.value) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(SmallSpacing))
+                            .clip(RoundedCornerShape(SizeXS))
                             .background(
                                 if (selectedFundId.value == it.id.toString())
-                                    BackgroundColor
-                                else BackgroundColorLite
+                                    PrimaryColor
+                                else PrimaryColorLite
                             )
                             .clickable {
                                 if (selectedFundId.value != it.id.toString()) {
@@ -188,7 +183,7 @@ fun ExpenseBottomSheet(
                         contentAlignment = Alignment.Center
                     ) {
                         Column(
-                            modifier = Modifier.padding(MediumPadding),
+                            modifier = Modifier.padding(SizeM),
                             horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
                                 text = it.fundName.toString().replaceFirstChar {
@@ -199,7 +194,7 @@ fun ExpenseBottomSheet(
                                     color = if (selectedFundId.value == it.id.toString()) WhiteColor else TextColor
                                 )
                             )
-                            Spacer(modifier = Modifier.height(SmallSpacing))
+                            Spacer(modifier = Modifier.height(SizeXS))
                             Text(
                                 text = "৳ ${NumberFormat.getInstance(Locale("en", "IN")).format(it.fundAmount)}",
                                 style = appTextStyle.copy(
@@ -225,7 +220,7 @@ fun ExpenseBottomSheet(
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Wallet,
-                        tint = BackgroundColor,
+                        tint = PrimaryColor,
                         contentDescription = "fund", modifier = Modifier.size(25.dp)
                     )
                 },
@@ -252,7 +247,7 @@ fun ExpenseBottomSheet(
                 leadingIcon = {
                     Icon(
                         Icons.Filled.Money,
-                        tint = BackgroundColor,
+                        tint = PrimaryColor,
                         contentDescription = "fund", modifier = Modifier.size(25.dp)
                     )
                 },

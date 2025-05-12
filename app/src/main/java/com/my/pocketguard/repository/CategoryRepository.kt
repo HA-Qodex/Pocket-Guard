@@ -40,10 +40,11 @@ class CategoryRepository @Inject constructor(
         try {
             store.collection("categories").whereEqualTo("created_by", userId).whereEqualTo("category_name", categoryName).get().addOnSuccessListener {
                 if (it.isEmpty) {
-                    store.collection("categories").document(uid).set(categoryData)
+                    val ref = store.collection("categories").document(uid)
+                    ref.set(categoryData)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                Log.d("CATEGORY", "Successfully added category.")
+                                Log.d("CATEGORY", "Successfully added category.${ref.path}")
                             } else {
                                 Log.d("CATEGORY", "Failed to add category")
                             }
@@ -66,8 +67,8 @@ class CategoryRepository @Inject constructor(
                     store.collection("categories").document(id).update(categoryData)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                _uiState.value = UIState.Success
-                                Log.d("CATEGORY", "Successfully updated category.")
+                                _uiState.value = UIState.Success("CATEGORY")
+                                Log.d("CATEGORY", "Successfully updated category.${task.getResult()}")
                             } else {
                                 _uiState.value = UIState.Error("Failed to update category")
                                 Log.d("CATEGORY", "Failed to update category")
@@ -84,7 +85,7 @@ class CategoryRepository @Inject constructor(
         try {
             firestoreService.fetchCategory().collect {
                 _categories.value = it
-                _uiState.value = UIState.Success
+                _uiState.value = UIState.Success()
             }
         } catch (e: Exception) {
             _uiState.value = UIState.Error(e.message.toString())
@@ -104,7 +105,7 @@ class CategoryRepository @Inject constructor(
 
             if(snapshot != null){
                 val categories = snapshot.toObjects(CategoryModel::class.java)
-                _uiState.value = UIState.Success
+                _uiState.value = UIState.Success()
                 _categories.value = categories
             }
         }

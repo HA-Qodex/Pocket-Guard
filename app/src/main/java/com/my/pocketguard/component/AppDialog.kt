@@ -14,10 +14,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,7 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.my.pocketguard.ui.theme.BackgroundColorLite
+import com.my.pocketguard.ui.theme.PrimaryColorLite
 import com.my.pocketguard.ui.theme.ButtonColor
 import com.my.pocketguard.ui.theme.RedColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -41,7 +37,7 @@ fun AppDialog(
 ) {
         AlertDialog(
             modifier = Modifier.wrapContentSize(),
-            containerColor = BackgroundColorLite,
+            containerColor = PrimaryColorLite,
             icon = { Icon(icon,
                 modifier = Modifier.size(50.dp),
                 tint = iconColor, contentDescription = "error") },

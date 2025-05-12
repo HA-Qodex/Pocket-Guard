@@ -18,9 +18,9 @@ val ButtonDark = Color(0xFF8AAAE5)
 val BackgroundDark = Color(0xFF2a2d32)
 
 // Common color
+val PrimaryColor = Color(0xFF0E8233)
+val PrimaryColorLite = Color(0xFFB8ECC9)
 val ButtonColor = Color(0xFF27956C)
-val BackgroundColor = Color(0xFF0E8233)
-val BackgroundColorLite = Color(0xFFB8ECC9)
 val DialogColor = Color.White
 val TextColor = Color.Black
 val RedColor = Color.Red

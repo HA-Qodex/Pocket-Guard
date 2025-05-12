@@ -1,6 +1,5 @@
 package com.my.pocketguard.component
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -9,10 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.my.pocketguard.ui.theme.ButtonColor
-import com.my.pocketguard.ui.theme.Dimension.SmallSpacing
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
 import com.my.pocketguard.ui.theme.WhiteColor
 import com.my.pocketguard.ui.theme.appTextStyle
 
@@ -25,7 +22,7 @@ fun AppButton(text: String,
 ) {
     Button(
         onClick = onClick,
-        shape = RoundedCornerShape(SmallSpacing),
+        shape = RoundedCornerShape(SizeXS),
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
             contentColor = contentColor

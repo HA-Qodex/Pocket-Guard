@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.my.pocketguard.component
 
 import androidx.compose.foundation.background
@@ -27,6 +29,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.my.pocketguard.ui.theme.ButtonColor
 import com.my.pocketguard.ui.theme.DialogColor
+import com.my.pocketguard.ui.theme.Dimension.SizeM
 import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.ui.theme.appTextStyle
 import com.my.pocketguard.util.AppUtils.convertMillisToDate
@@ -34,7 +37,6 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.util.Date
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppCalender(
     selectedDate: Long?,
@@ -84,7 +86,7 @@ fun AppCalender(
                         Text(
                             convertMillisToDate(
                                 calenderState.selectedDateMillis ?: System.currentTimeMillis()
-                            ), modifier = Modifier.padding(start = 15.dp)
+                            ), modifier = Modifier.padding(start = SizeM)
                         )
                     },
                     colors = DatePickerDefaults.colors(

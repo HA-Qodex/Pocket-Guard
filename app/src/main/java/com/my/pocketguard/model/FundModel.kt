@@ -8,7 +8,7 @@ data class FundModel(
     @get:PropertyName("fund_name") @set:PropertyName("fund_name")
     var fundName: String? = null,
     @get:PropertyName("fund_amount") @set:PropertyName("fund_amount")
-    var fundAmount: Int? = null,
+    var fundAmount: Long? = null,
     @get:PropertyName("remaining_amount") @set:PropertyName("remaining_amount")
-    var remainingAmount: Int? = null
+    var remainingAmount: Long? = null
 )
