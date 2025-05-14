@@ -1,10 +1,7 @@
 package com.my.pocketguard.repository
 
-import android.util.Log
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import com.my.pocketguard.model.CategoryModel
 import com.my.pocketguard.model.FundModel
 import com.my.pocketguard.services.FirestoreService
@@ -53,7 +50,7 @@ class ExpenseRepository @Inject constructor(
     fun storeExpense(
         date: Timestamp,
         amount: Long,
-        description: String,
+        title: String,
         categoryId: String,
         fundId: String
     ) {
@@ -62,7 +59,7 @@ class ExpenseRepository @Inject constructor(
             "id" to uid,
             "date" to date,
             "amount" to amount,
-            "description" to description,
+            "title" to title.trim(),
             "created_at" to FieldValue.serverTimestamp()
         )
         _uiState.value = UIState.Loading

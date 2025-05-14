@@ -12,7 +12,8 @@ object Dimension {
     val SizeL = 20.dp
 
     // Font sizes
-    val SmallText = 12.sp
-    val RegularText = 16.sp
-    val LargeText = 20.sp
+    val TextXS = 10.sp
+    val TextS = 12.sp
+    val TextM = 16.sp
+    val TextL = 20.sp
 }

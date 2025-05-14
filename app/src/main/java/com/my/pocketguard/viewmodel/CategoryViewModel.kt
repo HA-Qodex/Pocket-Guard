@@ -1,10 +1,8 @@
 package com.my.pocketguard.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.my.pocketguard.model.CategoryModel
-import com.my.pocketguard.model.UserModel
 import com.my.pocketguard.repository.CategoryRepository
 import com.my.pocketguard.util.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +19,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
 
     init {
         viewModelScope.launch {
-            categoryRepository.fetchNewCategory()
+            categoryRepository.fetchCategory()
         }
     }
 

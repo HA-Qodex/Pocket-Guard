@@ -9,7 +9,6 @@ import com.my.pocketguard.repository.ExpenseRepository
 import com.my.pocketguard.util.UIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +31,7 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
     fun storeExpense(
         date: Timestamp,
         amount: Long,
-        description: String,
+        title: String,
         categoryId: String,
         fundId: String
     ) {
@@ -40,7 +39,7 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
             expenseRepository.storeExpense(
                 date,
                 amount,
-                description,
+                title,
                 categoryId,
                 fundId
             )

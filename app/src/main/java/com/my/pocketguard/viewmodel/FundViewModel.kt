@@ -26,6 +26,10 @@ class FundViewModel @Inject constructor(private val fundRepository: FundReposito
         fundRepository.storeFund(categoryName.trim().lowercase(), amount)
     }
 
+    fun updateFund(id: String, fundName: String, amount: Long, remainingAmount: Long) {
+        fundRepository.updateFund(id, fundName, amount, remainingAmount)
+    }
+
     override fun onCleared() {
         fundRepository.removeListener()
         super.onCleared()

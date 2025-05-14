@@ -19,7 +19,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.Dimension.SizeXS
-import com.my.pocketguard.ui.theme.Dimension.SmallText
+import com.my.pocketguard.ui.theme.Dimension.TextS
 import com.my.pocketguard.ui.theme.RedColor
 import com.my.pocketguard.ui.theme.appTextStyle
 
@@ -36,7 +36,7 @@ fun AppTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     supportingText: String = "",
     keyboardOptions: KeyboardOptions,
-    visualTransformation: VisualTransformation
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -85,7 +85,7 @@ fun AppTextField(
             if (isError) Text(
                 supportingText,
                 modifier = modifier.padding(bottom = SizeXS),
-                style = appTextStyle.copy(color = RedColor, fontSize = SmallText)
+                style = appTextStyle.copy(color = RedColor, fontSize = TextS)
             ) else null
         }
     )

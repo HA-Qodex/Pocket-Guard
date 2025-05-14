@@ -2,6 +2,7 @@ package com.my.pocketguard.services
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.my.pocketguard.model.CategoryModel
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 import javax.inject.Inject
 
 class FirestoreService @Inject constructor(
@@ -38,6 +40,49 @@ class FirestoreService @Inject constructor(
         }
     }
 
+    fun storeCategory(
+        categoryData: HashMap<String, Any>,
+        result: (UIState) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: ""
+        val uid = UUID.randomUUID().toString()
+
+        store.collection("categories").whereEqualTo("created_by", userId)
+            .whereEqualTo("category_name", categoryData["category_name"]).get()
+            .addOnSuccessListener {
+                if (it.isEmpty) {
+                    val userRef = store.document("users/${userId}")
+                    categoryData["id"] = uid
+                    categoryData["created_by"] = userRef
+                    categoryData["created_at"] = FieldValue.serverTimestamp()
+                    val ref = store.collection("categories").document(uid)
+                    ref.set(categoryData).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            result(UIState.Success("CATEGORY"))
+                        } else {
+                            result(UIState.Error("Failed to add category"))
+                        }
+                    }
+                } else {
+                    result(UIState.Error("Category already exists"))
+                }
+            }
+    }
+
+    fun updateCategory(
+        categoryData: HashMap<String, Any>,
+        result: (UIState) -> Unit
+    ) {
+        store.collection("categories").document(categoryData["id"].toString()).update(categoryData)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    result(UIState.Success("CATEGORY"))
+                } else {
+                    result(UIState.Error("Failed to update category"))
+                }
+            }
+    }
+
     fun fetchFunds(): Flow<List<FundModel>> = callbackFlow {
         val userId = auth.currentUser?.uid
         val listener = store.collection("funds").whereEqualTo("created_by", userId)
@@ -55,6 +100,48 @@ class FirestoreService @Inject constructor(
         }
     }
 
+    fun storeFund(
+        fundData: HashMap<String, Any>,
+        result: (UIState) -> Unit
+    ) {
+        val userId = auth.currentUser?.uid ?: ""
+        val uid = UUID.randomUUID().toString()
+
+        store.collection("funds").whereEqualTo("created_by", userId)
+            .whereEqualTo("fund_name", fundData["fund_name"]).get()
+            .addOnSuccessListener {
+                if (it.isEmpty) {
+                    val userRef = store.document("users/${userId}")
+                    fundData["id"] = uid
+                    fundData["created_by"] = userRef
+                    fundData["created_at"] = FieldValue.serverTimestamp()
+                    store.collection("funds").document(uid).set(fundData).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            result(UIState.Success("FUND"))
+                        } else {
+                            result(UIState.Error("Failed to add fund"))
+                        }
+                    }
+                } else {
+                    result(UIState.Error("Fund already exists"))
+                }
+            }
+    }
+
+    fun updateFund(
+        fundData: HashMap<String, Any>,
+        result: (UIState) -> Unit
+    ) {
+        store.collection("funds").document(fundData["id"].toString()).update(fundData)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    result(UIState.Success("FUND"))
+                } else {
+                    result(UIState.Error("Failed to update fund"))
+                }
+            }
+    }
+
     fun fetchExpense(): Flow<List<Expense>> = callbackFlow {
         val userId = auth.currentUser?.uid
         if (userId == null) {
@@ -65,6 +152,7 @@ class FirestoreService @Inject constructor(
         val listenerRegistration = store.collection("expenses")
             .whereEqualTo("created_by", userId)
             .orderBy("created_at", Query.Direction.DESCENDING)
+            .limit(10)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
@@ -81,10 +169,15 @@ class FirestoreService @Inject constructor(
 
                         // Batch-fetch all category and fund docs in parallel
                         val categoryDeferred = async {
-                            categoryRefs.associateWith { it.get().await().toObject(CategoryModel::class.java) ?: CategoryModel() }
+                            categoryRefs.associateWith {
+                                it.get().await().toObject(CategoryModel::class.java)
+                                    ?: CategoryModel()
+                            }
                         }
                         val fundDeferred = async {
-                            fundRefs.associateWith { it.get().await().toObject(FundModel::class.java) ?: FundModel() }
+                            fundRefs.associateWith {
+                                it.get().await().toObject(FundModel::class.java) ?: FundModel()
+                            }
                         }
 
                         val categoryMap = categoryDeferred.await()
@@ -97,7 +190,7 @@ class FirestoreService @Inject constructor(
                                 fund = fundMap[expense.fundRef],
                                 date = expense.date,
                                 amount = expense.amount,
-                                description = expense.description
+                                title = expense.title
                             )
                         }.toList()
 

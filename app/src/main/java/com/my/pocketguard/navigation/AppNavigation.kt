@@ -5,7 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.my.pocketguard.view.CategoryView
-import com.my.pocketguard.view.DashboardView
+import com.my.pocketguard.view.dashboard.DashboardView
 import com.my.pocketguard.view.ExpenseView
 import com.my.pocketguard.view.FundView
 import com.my.pocketguard.view.SplashView

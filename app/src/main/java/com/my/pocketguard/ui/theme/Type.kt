@@ -7,7 +7,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.my.pocketguard.R
-import com.my.pocketguard.ui.theme.Dimension.RegularText
+import com.my.pocketguard.ui.theme.Dimension.TextM
 
 val notoFamily = FontFamily(
     Font(R.font.noto_sans_regular, FontWeight.Normal),
@@ -43,5 +43,5 @@ val appTextStyle = TextStyle(
     fontFamily = notoFamily,
     fontWeight = FontWeight.Normal,
     color = TextColor,
-    fontSize = RegularText,
+    fontSize = TextM,
 )

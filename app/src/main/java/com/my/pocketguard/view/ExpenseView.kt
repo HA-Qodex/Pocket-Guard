@@ -1,13 +1,10 @@
 package com.my.pocketguard.view
 
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -19,11 +16,8 @@ import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.NoteAlt
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material.icons.filled.WarningAmber
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -53,7 +46,6 @@ import com.my.pocketguard.model.CategoryModel
 import com.my.pocketguard.model.FundModel
 import com.my.pocketguard.navigation.AppRoutes
 import com.my.pocketguard.ui.theme.Dimension.SizeL
-import com.my.pocketguard.ui.theme.Dimension.SizeS
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.RedColor
 import com.my.pocketguard.util.AppUtils.FAILED
@@ -70,7 +62,8 @@ fun ExpenseView(navController: NavController) {
     val categories = viewModel.categories.collectAsState()
     val funds = viewModel.funds.collectAsState()
     val expenseAmount = remember { mutableStateOf("") }
-    val description = remember { mutableStateOf("") }
+    val title = remember { mutableStateOf("") }
+    var titleError by remember { mutableStateOf<String>("") }
     var expenseAmountError by remember { mutableStateOf<String>("") }
     var calenderError by remember { mutableStateOf<String>("") }
     var fundError by remember { mutableStateOf<String>("") }
@@ -105,7 +98,7 @@ fun ExpenseView(navController: NavController) {
                 isLoading.value = false
                 if((uiState as UIState.Success).tag == "EXPENSE"){
                     expenseAmount.value = ""
-                    description.value = ""
+                    title.value = ""
                     selectedDate = System.currentTimeMillis()
                     selectedCategory.value = CategoryModel(categoryName = "Category")
                     selectedFunds.value = FundModel(fundName = "Fund")
@@ -202,6 +195,32 @@ fun ExpenseView(navController: NavController) {
                 AppTextField(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    label = "Title",
+                    onValueChange = { value ->
+                        title.value = value
+                        if (value.isNotEmpty()) {
+                            titleError = ""
+                        }
+                    },
+                    value = title.value,
+                    leadingIcon = {
+                        Icon(
+                            Icons.Filled.NoteAlt,
+                            tint = PrimaryColor,
+                            contentDescription = "title", modifier = Modifier.size(25.dp)
+                        )
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    isError = titleError != "",
+                    supportingText = titleError.toString(),
+                )
+                AppTextField(
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     label = "Expense Amount",
                     onValueChange = { value ->
                         expenseAmount.value = value
@@ -219,34 +238,10 @@ fun ExpenseView(navController: NavController) {
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Done
                     ),
                     isError = expenseAmountError != "",
                     supportingText = expenseAmountError.toString(),
-                    visualTransformation = VisualTransformation.None
-                )
-                AppTextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    label = "Description",
-                    onValueChange = { value ->
-                        description.value = value
-                    },
-                    value = description.value,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.NoteAlt,
-                            tint = PrimaryColor,
-                            contentDescription = "description", modifier = Modifier.size(25.dp)
-                        )
-                    },
-                    maxLines = 3,
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done
-                    ),
-                    visualTransformation = VisualTransformation.None
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -257,17 +252,20 @@ fun ExpenseView(navController: NavController) {
                 if (selectedCategory.value.id == null) {
                     categoryError = "Please select category"
                 }
+                if (title.value.isEmpty()) {
+                    titleError = "Please enter title"
+                }
                 if (expenseAmount.value.isEmpty()) {
                     expenseAmountError = "Please enter  amount"
                 } else if ((expenseAmount.value.toDoubleOrNull()?.toInt() ?: 0) < 1) {
                     expenseAmountError = "Invalid amount"
                 }
 
-                if (fundError.isEmpty() && categoryError.isEmpty() && expenseAmountError.isEmpty()) {
+                if (fundError.isEmpty() && categoryError.isEmpty() && titleError.isEmpty() && expenseAmountError.isEmpty()) {
                     viewModel.storeExpense(
                         date = Timestamp(selectedDate?.div(1000) ?: 0, 0),
                         amount = expenseAmount.value.toLong(),
-                        description = description.value,
+                        title = title.value,
                         categoryId = selectedCategory.value.id.toString(),
                         fundId = selectedFunds.value.id.toString()
                     )

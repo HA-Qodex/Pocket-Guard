@@ -14,7 +14,7 @@ data class ExpenseModel(
     var fundRef: DocumentReference? = null,
     val date: Timestamp? = null,
     val amount: Long? = null,
-    val description: String? = null
+    val title: String? = null
 )
 
 data class Expense(
@@ -23,5 +23,5 @@ data class Expense(
     var fund: FundModel?,
     val date: Timestamp? = null,
     val amount: Long? = null,
-    val description: String? = null
+    val title: String? = null
 )

@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.my.pocketguard.ui.theme.Dimension.SizeXS
-import com.my.pocketguard.ui.theme.Dimension.SmallText
+import com.my.pocketguard.ui.theme.Dimension.TextS
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.RedColor
 import com.my.pocketguard.ui.theme.appTextStyle
@@ -59,7 +59,7 @@ fun AppDisableTextField(
             Text(
                 supportingText,
                 modifier = modifier.padding(bottom = SizeXS),
-                style = appTextStyle.copy(color = RedColor, fontSize = SmallText))
+                style = appTextStyle.copy(color = RedColor, fontSize = TextS))
         } else null
         }
     )

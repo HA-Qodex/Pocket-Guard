@@ -44,7 +44,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.PrimaryColorLite
 import com.my.pocketguard.ui.theme.Dimension.SizeL
-import com.my.pocketguard.ui.theme.Dimension.LargeText
+import com.my.pocketguard.ui.theme.Dimension.TextL
 import com.my.pocketguard.ui.theme.Dimension.SizeM
 import com.my.pocketguard.ui.theme.Dimension.SizeS
 import com.my.pocketguard.ui.theme.Dimension.SizeXS
@@ -123,7 +123,7 @@ fun CategoryBottomSheet(
                 Text(
                     "CATEGORIES",
                     modifier = Modifier.padding(horizontal = SizeXS),
-                    style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = LargeText)
+                    style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = TextL)
                 )
                 HorizontalDivider(
                     modifier = Modifier

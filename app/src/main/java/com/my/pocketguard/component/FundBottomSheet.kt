@@ -45,10 +45,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.my.pocketguard.model.FundModel
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.PrimaryColorLite
 import com.my.pocketguard.ui.theme.Dimension.SizeL
-import com.my.pocketguard.ui.theme.Dimension.LargeText
+import com.my.pocketguard.ui.theme.Dimension.TextL
 import com.my.pocketguard.ui.theme.Dimension.SizeM
 import com.my.pocketguard.ui.theme.Dimension.SizeS
 import com.my.pocketguard.ui.theme.Dimension.SizeXS
@@ -69,7 +70,7 @@ fun FundBottomSheet(
     val viewModel: FundViewModel = hiltViewModel()
     val uiState by viewModel.uiState.collectAsState()
     val funds = viewModel.funds.collectAsState()
-    val selectedFundId = remember { mutableStateOf("") }
+    var selectedFund by remember { mutableStateOf(FundModel()) }
     val fundTitle = remember { mutableStateOf("") }
     val fundAmount = remember { mutableStateOf("") }
     var fundTitleError by remember { mutableStateOf<String>("") }
@@ -99,7 +100,7 @@ fun FundBottomSheet(
                 fundAmount.value = ""
                 fundTitleError = ""
                 fundAmountError = ""
-                selectedFundId.value = ""
+                selectedFund = FundModel()
                 isLoading.value = false
                 showDialog.value = false
             }
@@ -137,7 +138,7 @@ fun FundBottomSheet(
                 Text(
                     "FUNDS",
                     modifier = Modifier.padding(horizontal = SizeXS),
-                    style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = LargeText)
+                    style = appTextStyle.copy(fontWeight = FontWeight.Bold, fontSize = TextL)
                 )
                 HorizontalDivider(
                     modifier = Modifier
@@ -164,13 +165,13 @@ fun FundBottomSheet(
                         modifier = Modifier
                             .clip(RoundedCornerShape(SizeXS))
                             .background(
-                                if (selectedFundId.value == it.id.toString())
+                                if (selectedFund.id == it.id.toString())
                                     PrimaryColor
                                 else PrimaryColorLite
                             )
                             .clickable {
-                                if (selectedFundId.value != it.id.toString()) {
-                                    selectedFundId.value = it.id.toString()
+                                if (selectedFund.id != it.id.toString()) {
+                                    selectedFund = it
                                     fundTitle.value =
                                         it.fundName.toString().replaceFirstChar {
                                             it.uppercase()
@@ -179,7 +180,7 @@ fun FundBottomSheet(
                                     fundTitleError = ""
                                     fundAmountError = ""
                                 } else {
-                                    selectedFundId.value = ""
+                                    selectedFund = FundModel()
                                     fundTitle.value = ""
                                     fundAmount.value = ""
                                 }
@@ -188,22 +189,26 @@ fun FundBottomSheet(
                     ) {
                         Column(
                             modifier = Modifier.padding(SizeM),
-                            horizontalAlignment = Alignment.CenterHorizontally) {
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
                                 text = it.fundName.toString().replaceFirstChar {
                                     it.uppercase()
                                 },
                                 style = appTextStyle.copy(
                                     fontWeight = FontWeight.Bold,
-                                    color = if (selectedFundId.value == it.id.toString()) WhiteColor else TextColor
+                                    color = if (selectedFund.id == it.id.toString()) WhiteColor else TextColor
                                 )
                             )
                             Spacer(modifier = Modifier.height(SizeXS))
                             Text(
-                                text = "৳ ${NumberFormat.getInstance(Locale("en", "IN")).format(it.fundAmount)}",
+                                text = "৳ ${
+                                    NumberFormat.getInstance(Locale("en", "IN"))
+                                        .format(it.fundAmount)
+                                }",
                                 style = appTextStyle.copy(
                                     fontWeight = FontWeight.Normal,
-                                    color = if (selectedFundId.value == it.id.toString()) WhiteColor else TextColor
+                                    color = if (selectedFund.id == it.id.toString()) WhiteColor else TextColor
                                 )
                             )
                         }
@@ -273,10 +278,27 @@ fun FundBottomSheet(
                     fundAmountError = "Invalid amount"
                 }
 
-                if(fundTitleError.isEmpty() && fundAmountError.isEmpty()){
-                    viewModel.storeFund(fundTitle.value, fundAmount.value.toDoubleOrNull()?.toInt() ?: 0)
+                if (fundTitleError.isEmpty() && fundAmountError.isEmpty()) {
+                    if (selectedFund.id != null) {
+                        val updateAmount = fundAmount.value.toDoubleOrNull()?.toLong() ?: 0L
+                        viewModel.updateFund(
+                            selectedFund.id.toString(),
+                            fundTitle.value,
+                            updateAmount,
+                            selectedFund.remainingAmount?.minus(
+                                selectedFund.fundAmount?.minus(
+                                    updateAmount
+                                ) ?: 0L
+                            ) ?: 0L
+                        )
+                    } else {
+                        viewModel.storeFund(
+                            fundTitle.value,
+                            fundAmount.value.toDoubleOrNull()?.toInt() ?: 0
+                        )
+                    }
                 }
-            }, text = if (selectedFundId.value != "") "Update" else "Submit")
+            }, text = if (selectedFund.id != null) "Update" else "Submit")
         }
     }
 }
