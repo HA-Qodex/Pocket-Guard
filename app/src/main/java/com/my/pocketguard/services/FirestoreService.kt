@@ -21,11 +21,13 @@ import javax.inject.Inject
 
 class FirestoreService @Inject constructor(
     private val store: FirebaseFirestore,
-    private val auth: FirebaseAuth
+    auth: FirebaseAuth
 ) {
+    val userId = auth.currentUser?.uid ?: ""
+    val userRef = store.collection("users").document(userId)
+
     fun fetchCategory(): Flow<List<CategoryModel>> = callbackFlow {
-        val userId = auth.currentUser?.uid
-        val listener = store.collection("categories").whereEqualTo("created_by", userId)
+        val listener = store.collection("categories").whereEqualTo("created_by", userRef)
             .orderBy("category_name", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 Log.d("FIRESTORE", "fetchCategory: $error")
@@ -44,10 +46,9 @@ class FirestoreService @Inject constructor(
         categoryData: HashMap<String, Any>,
         result: (UIState) -> Unit
     ) {
-        val userId = auth.currentUser?.uid ?: ""
         val uid = UUID.randomUUID().toString()
 
-        store.collection("categories").whereEqualTo("created_by", userId)
+        store.collection("categories").whereEqualTo("created_by", userRef)
             .whereEqualTo("category_name", categoryData["category_name"]).get()
             .addOnSuccessListener {
                 if (it.isEmpty) {
@@ -84,8 +85,7 @@ class FirestoreService @Inject constructor(
     }
 
     fun fetchFunds(): Flow<List<FundModel>> = callbackFlow {
-        val userId = auth.currentUser?.uid
-        val listener = store.collection("funds").whereEqualTo("created_by", userId)
+        val listener = store.collection("funds").whereEqualTo("created_by", userRef)
             .orderBy("fund_name", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshot, error ->
                 Log.d("FIRESTORE", "fetchFunds: $error")
@@ -104,10 +104,9 @@ class FirestoreService @Inject constructor(
         fundData: HashMap<String, Any>,
         result: (UIState) -> Unit
     ) {
-        val userId = auth.currentUser?.uid ?: ""
         val uid = UUID.randomUUID().toString()
 
-        store.collection("funds").whereEqualTo("created_by", userId)
+        store.collection("funds").whereEqualTo("created_by", userRef)
             .whereEqualTo("fund_name", fundData["fund_name"]).get()
             .addOnSuccessListener {
                 if (it.isEmpty) {
@@ -143,14 +142,8 @@ class FirestoreService @Inject constructor(
     }
 
     fun fetchExpense(): Flow<List<Expense>> = callbackFlow {
-        val userId = auth.currentUser?.uid
-        if (userId == null) {
-            close(IllegalStateException("User not authenticated"))
-            return@callbackFlow
-        }
-
         val listenerRegistration = store.collection("expenses")
-            .whereEqualTo("created_by", userId)
+            .whereEqualTo("created_by", userRef)
             .orderBy("created_at", Query.Direction.DESCENDING)
             .limit(10)
             .addSnapshotListener { snapshot, error ->
@@ -211,7 +204,7 @@ class FirestoreService @Inject constructor(
         result: (UIState) -> Unit
     ) {
         try {
-            expenseData["created_by"] = auth.currentUser?.uid ?: ""
+            expenseData["created_by"] = userRef
             store.runTransaction { transaction ->
                 val expenseRef = store.collection("expenses").document(expenseData["id"].toString())
                 val categoryRef = store.collection("categories").document(categoryId)
