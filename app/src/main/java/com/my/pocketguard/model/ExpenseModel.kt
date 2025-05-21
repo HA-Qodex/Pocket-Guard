@@ -2,6 +2,7 @@ package com.my.pocketguard.model
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.PropertyName
 
 data class ExpenseModel(
@@ -23,5 +24,7 @@ data class Expense(
     var fund: FundModel?,
     val date: Timestamp? = null,
     val amount: Long? = null,
-    val title: String? = null
+    val title: String? = null,
+    @get:PropertyName("created_at") @set:PropertyName("created_at")
+    var createdAt: FieldValue? = FieldValue.serverTimestamp()
 )

@@ -26,13 +26,13 @@ fun AppDisableTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     placeholder: String,
-    onClick: (() -> Unit)
+    onClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
     OutlinedTextField(
         modifier = modifier.clickable(
-            onClick = onClick,
+            onClick =  onClick,
             indication = null,
             interactionSource = interactionSource
         ),

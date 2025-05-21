@@ -1,24 +1,26 @@
 package com.my.pocketguard.view
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.CheckCircleOutline
-import androidx.compose.material.icons.filled.Money
-import androidx.compose.material.icons.filled.NoteAlt
-import androidx.compose.material.icons.filled.Wallet
+import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,32 +28,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.firebase.Timestamp
 import com.my.pocketguard.component.AppBar
 import com.my.pocketguard.component.AppButton
-import com.my.pocketguard.component.AppCalender
 import com.my.pocketguard.component.AppDialog
-import com.my.pocketguard.component.AppDisableTextField
-import com.my.pocketguard.component.AppDropdown
-import com.my.pocketguard.component.AppTextField
+import com.my.pocketguard.component.AppFAB
 import com.my.pocketguard.component.CustomLoader
-import com.my.pocketguard.model.CategoryModel
-import com.my.pocketguard.model.FundModel
+import com.my.pocketguard.component.ExpenseBottomSheet
+import com.my.pocketguard.model.Expense
 import com.my.pocketguard.navigation.AppRoutes
 import com.my.pocketguard.ui.theme.Dimension.SizeL
+import com.my.pocketguard.ui.theme.Dimension.SizeS
+import com.my.pocketguard.ui.theme.Dimension.SizeXS
+import com.my.pocketguard.ui.theme.Dimension.SizeXXL
+import com.my.pocketguard.ui.theme.Dimension.TextM
+import com.my.pocketguard.ui.theme.Dimension.TextS
+import com.my.pocketguard.ui.theme.GrayColor
 import com.my.pocketguard.ui.theme.PrimaryColor
 import com.my.pocketguard.ui.theme.RedColor
+import com.my.pocketguard.ui.theme.appTextStyle
 import com.my.pocketguard.util.AppUtils.FAILED
 import com.my.pocketguard.util.AppUtils.SUCCESSFUL
-import com.my.pocketguard.util.AppUtils.convertMillisToDate
 import com.my.pocketguard.util.UIState
+import com.my.pocketguard.view.dashboard.ExpenseList
 import com.my.pocketguard.viewmodel.ExpenseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,24 +64,15 @@ fun ExpenseView(navController: NavController) {
     val uiState by viewModel.uiState.collectAsState()
     val categories = viewModel.categories.collectAsState()
     val funds = viewModel.funds.collectAsState()
-    val expenseAmount = remember { mutableStateOf("") }
-    val title = remember { mutableStateOf("") }
-    var titleError by remember { mutableStateOf<String>("") }
-    var expenseAmountError by remember { mutableStateOf<String>("") }
-    var calenderError by remember { mutableStateOf<String>("") }
-    var fundError by remember { mutableStateOf<String>("") }
-    var categoryError by remember { mutableStateOf<String>("") }
-    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    var showDatePicker = remember { mutableStateOf(false) }
-    val selectedCategory =
-        remember { mutableStateOf(CategoryModel(categoryName = "Category")) }
-    val selectedFunds = remember { mutableStateOf(FundModel(fundName = "Fund")) }
     val isLoading = remember { mutableStateOf(false) }
     val showDialog = remember { mutableStateOf(false) }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogText by remember { mutableStateOf("") }
     var dialogIcon by remember { mutableStateOf(Icons.Default.CheckCircleOutline) }
-    val scrollState = rememberScrollState()
+    var showCreateDialog = remember { mutableStateOf(false) }
+    val expenseSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var expenses = remember { mutableStateOf(emptyList<Expense>()) }
+
 
     LaunchedEffect(uiState) {
         when (uiState) {
@@ -96,12 +90,8 @@ fun ExpenseView(navController: NavController) {
 
             is UIState.Success -> {
                 isLoading.value = false
-                if((uiState as UIState.Success).tag == "EXPENSE"){
-                    expenseAmount.value = ""
-                    title.value = ""
-                    selectedDate = System.currentTimeMillis()
-                    selectedCategory.value = CategoryModel(categoryName = "Category")
-                    selectedFunds.value = FundModel(fundName = "Fund")
+                if ((uiState as UIState.Success).tag == "EXPENSE") {
+                    expenses.value = emptyList<Expense>()
                     showDialog.value = true
                     dialogIcon = Icons.Default.CheckCircleOutline
                     dialogTitle = SUCCESSFUL
@@ -116,162 +106,107 @@ fun ExpenseView(navController: NavController) {
     }
 
     if (showDialog.value) {
-        AppDialog(title = dialogTitle, text = dialogText, icon = dialogIcon, iconColor = if(dialogTitle == SUCCESSFUL) PrimaryColor else RedColor, confirm = "OK", showDialog = showDialog)
-    }
-
-    if (showDatePicker.value) {
-        AppCalender(
-            selectedDate = selectedDate,
-            onDateSelected = {
-                selectedDate = it
-                showDatePicker.value = false
-            },
-            onDismiss = {
-                showDatePicker.value = false
-            }
+        AppDialog(
+            title = dialogTitle,
+            text = dialogText,
+            icon = dialogIcon,
+            iconColor = if (dialogTitle == SUCCESSFUL) PrimaryColor else RedColor,
+            confirm = "OK",
+            showDialog = showDialog
         )
     }
 
-    Scaffold(topBar = { AppBar(navController, "Expense", route = AppRoutes.DASHBOARD.route) }) {
+    if (showCreateDialog.value) {
+        ExpenseBottomSheet(
+            expenseSheetState,
+            showCreateDialog,
+            categories.value,
+            funds.value,
+            expenses
+        )
+    }
+
+    Scaffold(
+        topBar = { AppBar(navController, "Expense", route = AppRoutes.DASHBOARD.route) },
+    ) {
         Column(
             modifier = Modifier
                 .padding(it)
-                .padding(horizontal = SizeL)
+                .padding(horizontal = SizeL, vertical = SizeXS)
         ) {
-            Column(modifier = Modifier.verticalScroll(scrollState)) {
-                AppDisableTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = convertMillisToDate(
-                        selectedDate ?: System.currentTimeMillis()
-                    ),
-                    placeholder = "Select Date",
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.CalendarToday,
-                            tint = PrimaryColor,
-                            contentDescription = "calender", modifier = Modifier.size(25.dp)
-                        )
-                    },
-                    onClick = {
-                        showDatePicker.value = true
-                    },
-                    isError = calenderError != "",
-                    supportingText = calenderError.toString(),
-                )
-                AppDropdown(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = "Fund", items = funds.value, onItemSelected = {
-                        selectedFunds.value = it
-                        fundError = ""
-                    }, selectedItem = selectedFunds.value, itemLabel = {
-                        "${it.fundName?.replaceFirstChar { it.uppercase() }}${if (it.remainingAmount != null) (" | " + it.remainingAmount) else ""}"
-                    },
-                    supportingText = fundError,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.Wallet,
-                            tint = PrimaryColor,
-                            contentDescription = "calender", modifier = Modifier.size(25.dp)
-                        )
-                    }
-                )
-                AppDropdown(
-                    modifier = Modifier.fillMaxWidth(),
-                    title = "Category", items = categories.value, onItemSelected = {
-                        selectedCategory.value = it
-                        categoryError = ""
-                    }, selectedItem = selectedCategory.value, itemLabel = {
-                        it.categoryName.toString().replaceFirstChar { it.uppercase() }
-                    },
-                    supportingText = categoryError.toString(),
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.Category,
-                            tint = PrimaryColor,
-                            contentDescription = "calender", modifier = Modifier.size(25.dp)
-                        )
-                    }
-                )
-                AppTextField(
+            if (expenses.value.isNotEmpty()) {
+                ExpenseList(expenses.value)
+                Spacer(modifier = Modifier.weight(1f))
+                HorizontalDivider()
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    label = "Title",
-                    onValueChange = { value ->
-                        title.value = value
-                        if (value.isNotEmpty()) {
-                            titleError = ""
-                        }
-                    },
-                    value = title.value,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.NoteAlt,
-                            tint = PrimaryColor,
-                            contentDescription = "title", modifier = Modifier.size(25.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = SizeL),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        "Total",
+                        style = appTextStyle.copy(
+                            fontSize = TextS,
+                            fontWeight = FontWeight.Bold,
+                            color = RedColor
                         )
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
-                    isError = titleError != "",
-                    supportingText = titleError.toString(),
-                )
-                AppTextField(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    label = "Expense Amount",
-                    onValueChange = { value ->
-                        expenseAmount.value = value
-                        if (value.isNotEmpty()) {
-                            expenseAmountError = ""
-                        }
-                    },
-                    value = expenseAmount.value,
-                    leadingIcon = {
-                        Icon(
-                            Icons.Filled.Money,
-                            tint = PrimaryColor,
-                            contentDescription = "amount", modifier = Modifier.size(25.dp)
+                    )
+                    Spacer(modifier = Modifier.width(SizeS))
+                    Text(
+                        "৳${
+                            expenses.value.sumOf {
+                                it.amount?.toLong() ?: 0L
+                            }
+                        }",
+                        style = appTextStyle.copy(
+                            fontSize = TextS,
+                            fontWeight = FontWeight.Bold,
+                            color = RedColor
                         )
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = expenseAmountError != "",
-                    supportingText = expenseAmountError.toString(),
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            AppButton(onClick = {
-                if (selectedFunds.value.fundAmount == null) {
-                    fundError = "Please select fund"
-                }
-                if (selectedCategory.value.id == null) {
-                    categoryError = "Please select category"
-                }
-                if (title.value.isEmpty()) {
-                    titleError = "Please enter title"
-                }
-                if (expenseAmount.value.isEmpty()) {
-                    expenseAmountError = "Please enter  amount"
-                } else if ((expenseAmount.value.toDoubleOrNull()?.toInt() ?: 0) < 1) {
-                    expenseAmountError = "Invalid amount"
-                }
-
-                if (fundError.isEmpty() && categoryError.isEmpty() && titleError.isEmpty() && expenseAmountError.isEmpty()) {
-                    viewModel.storeExpense(
-                        date = Timestamp(selectedDate?.div(1000) ?: 0, 0),
-                        amount = expenseAmount.value.toLong(),
-                        title = title.value,
-                        categoryId = selectedCategory.value.id.toString(),
-                        fundId = selectedFunds.value.id.toString()
                     )
                 }
-            }, text = "Submit")
-
+                Spacer(modifier = Modifier.height(SizeS))
+                Row {
+                    AppButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            showCreateDialog.value = true
+                        }, text = "Add More"
+                    )
+                    Spacer(modifier = Modifier.width(SizeXS))
+                    AppButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            viewModel.storeExpense(expenses.value)
+                        }, text = "Submit"
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(onClick = {
+                            showCreateDialog.value = true
+                        }),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        Icons.Default.Receipt, contentDescription = "expense",
+                        modifier = Modifier.size(SizeXXL),
+                        tint = GrayColor.copy(alpha = 0.6f)
+                    )
+                    Spacer(modifier = Modifier.height(SizeXS))
+                    Text(
+                        "Add Expense",
+                        style = appTextStyle.copy(
+                            fontSize = TextM,
+                            color = GrayColor.copy(alpha = 0.6f)
+                        )
+                    )
+                }
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ object Dimension {
     val SizeS = 10.dp
     val SizeM = 15.dp
     val SizeL = 20.dp
+    val SizeXL = 30.dp
+    val SizeXXL = 50.dp
 
     // Font sizes
     val TextXS = 10.sp

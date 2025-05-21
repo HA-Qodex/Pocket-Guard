@@ -10,10 +10,23 @@ import java.util.TimeZone
 
 object AppUtils {
 
-    private val calendar: Calendar = Calendar.getInstance()
-    val currentYear = calendar.get(Calendar.YEAR)
-    val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
-    val currentMonth = calendar.get(Calendar.MONTH)
+    fun getCurrentMonthStartAndEnd(): Pair<Long, Long> {
+        val calendar = Calendar.getInstance()
+
+        // Start of current month
+        calendar.set(Calendar.DAY_OF_MONTH, 1)
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startOfMonth = calendar.timeInMillis
+
+        // Start of next month
+        calendar.add(Calendar.MONTH, 1)
+        val startOfNextMonth = calendar.timeInMillis
+
+        return Pair(startOfMonth, startOfNextMonth)
+    }
 
     @SuppressLint("SimpleDateFormat")
     fun convertMillisToDate(millis: Long): String {

@@ -25,3 +25,4 @@ val DialogColor = Color.White
 val TextColor = Color.Black
 val RedColor = Color.Red
 val WhiteColor = Color.White
+val GrayColor = Color.Gray

@@ -16,9 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.my.pocketguard.model.Expense
-import com.my.pocketguard.ui.theme.Dimension.SizeL
 import com.my.pocketguard.ui.theme.Dimension.SizeM
 import com.my.pocketguard.ui.theme.Dimension.SizeS
 import com.my.pocketguard.ui.theme.Dimension.SizeXS

@@ -1,6 +1,5 @@
 package com.my.pocketguard.model
 
-import com.google.firebase.Timestamp
 import com.google.firebase.firestore.PropertyName
 
 data class FundModel(

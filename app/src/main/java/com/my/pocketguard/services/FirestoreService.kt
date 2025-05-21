@@ -1,14 +1,18 @@
 package com.my.pocketguard.services
 
 import android.util.Log
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.my.pocketguard.model.CategoryModel
 import com.my.pocketguard.model.Expense
 import com.my.pocketguard.model.ExpenseModel
 import com.my.pocketguard.model.FundModel
+import com.my.pocketguard.util.AppUtils.getCurrentMonthStartAndEnd
 import com.my.pocketguard.util.UIState
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
@@ -114,13 +118,14 @@ class FirestoreService @Inject constructor(
                     fundData["id"] = uid
                     fundData["created_by"] = userRef
                     fundData["created_at"] = FieldValue.serverTimestamp()
-                    store.collection("funds").document(uid).set(fundData).addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            result(UIState.Success("FUND"))
-                        } else {
-                            result(UIState.Error("Failed to add fund"))
+                    store.collection("funds").document(uid).set(fundData)
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                result(UIState.Success("FUND"))
+                            } else {
+                                result(UIState.Error("Failed to add fund"))
+                            }
                         }
-                    }
                 } else {
                     result(UIState.Error("Fund already exists"))
                 }
@@ -197,34 +202,130 @@ class FirestoreService @Inject constructor(
         awaitClose { listenerRegistration.remove() }
     }
 
+    fun fetchExpenseAnalytics(): Flow<List<Expense>> = callbackFlow {
+        Log.d("ANALYTICS", "${getCurrentMonthStartAndEnd().first}  ${getCurrentMonthStartAndEnd().second}")
+        val listenerRegistration = store.collection("expenses")
+            .whereEqualTo("created_by", userRef)
+            .whereGreaterThanOrEqualTo("date", Timestamp(getCurrentMonthStartAndEnd().first / 1000, 0))
+            .whereLessThan("date", Timestamp(getCurrentMonthStartAndEnd().second / 1000, 0))
+            .orderBy("created_at", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    launch {
+                        val expenseModels = snapshot.toObjects(ExpenseModel::class.java)
+
+                        // Collect all unique category and fund document refs
+                        val categoryRefs = expenseModels.mapNotNull { it.categoryRef }.toSet()
+                        val fundRefs = expenseModels.mapNotNull { it.fundRef }.toSet()
+
+                        // Batch-fetch all category and fund docs in parallel
+                        val categoryDeferred = async {
+                            categoryRefs.associateWith {
+                                it.get().await().toObject(CategoryModel::class.java)
+                                    ?: CategoryModel()
+                            }
+                        }
+                        val fundDeferred = async {
+                            fundRefs.associateWith {
+                                it.get().await().toObject(FundModel::class.java) ?: FundModel()
+                            }
+                        }
+
+                        val categoryMap = categoryDeferred.await()
+                        val fundMap = fundDeferred.await()
+
+                        val resolvedExpenses = expenseModels.map { expense ->
+                            Expense(
+                                id = expense.id,
+                                category = categoryMap[expense.categoryRef],
+                                fund = fundMap[expense.fundRef],
+                                date = expense.date,
+                                amount = expense.amount,
+                                title = expense.title
+                            )
+                        }.toList()
+
+                        trySend(resolvedExpenses).isSuccess
+                    }
+                } else {
+                    trySend(emptyList()).isSuccess
+                }
+            }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
     fun storeExpense(
-        categoryId: String,
-        fundId: String,
-        expenseData: HashMap<String, Any>,
+        expenseList: List<Expense>,
         result: (UIState) -> Unit
     ) {
         try {
-            expenseData["created_by"] = userRef
+            data class ExpenseWriteData(
+                val ref: DocumentReference,
+                val data: Map<String, Any?>
+            )
+
+            data class FundUpdateData(
+                val ref: DocumentReference,
+                val newRemainingAmount: Long
+            )
+
+            val expenseWriteList = mutableListOf<ExpenseWriteData>()
+            val fundUpdateList = mutableListOf<FundUpdateData>()
+
             store.runTransaction { transaction ->
-                val expenseRef = store.collection("expenses").document(expenseData["id"].toString())
-                val categoryRef = store.collection("categories").document(categoryId)
-                val fundRef = store.collection("funds").document(fundId)
-                val remainingAmount = transaction.get(fundRef).get("remaining_amount") as Long
-                val expenseAmount = expenseData["amount"] as Long
-                if (expenseAmount > remainingAmount) {
-                    throw Exception("INSUFFICIENT FUND")
+
+                expenseList.forEach { expense ->
+                    val expenseId = expense.id ?: throw Exception("Missing expense ID")
+                    val categoryId = expense.category?.id ?: throw Exception("Missing category ID")
+                    val fundId = expense.fund?.id ?: throw Exception("Missing fund ID")
+                    val amount = (expense.amount as? Number)?.toLong()
+                        ?: throw Exception("Invalid amount for expense: $expenseId")
+
+                    val expenseRef = store.collection("expenses").document(expenseId)
+                    val categoryRef = store.collection("categories").document(categoryId)
+                    val fundRef = store.collection("funds").document(fundId)
+
+                    val remainingAmount = (transaction.get(fundRef).get("remaining_amount") as? Number)?.toLong()
+                        ?: throw Exception("Missing or invalid remaining amount for fund: $fundId")
+
+                    if (amount > remainingAmount) {
+                        throw FirebaseFirestoreException(
+                            "Insufficient fund for expense '${expense.title ?: ""}'",
+                            FirebaseFirestoreException.Code.ABORTED
+                        ) as Throwable
+                    }
+
+                    val expenseData = mapOf(
+                        "id" to expenseId,
+                        "date" to expense.date,
+                        "amount" to amount,
+                        "title" to (expense.title?.trim() ?: ""),
+                        "created_at" to FieldValue.serverTimestamp(),
+                        "created_by" to userRef,
+                        "category_ref" to categoryRef,
+                        "fund_ref" to fundRef
+                    )
+
+                    expenseWriteList.add(ExpenseWriteData(expenseRef, expenseData))
+                    fundUpdateList.add(FundUpdateData(fundRef, remainingAmount - amount))
                 }
-                expenseData["category_ref"] = categoryRef
-                expenseData["fund_ref"] = fundRef
-                transaction.set(expenseRef, expenseData)
-                transaction.update(fundRef, "remaining_amount", remainingAmount - expenseAmount)
+
+                expenseWriteList.forEach { transaction.set(it.ref, it.data) }
+                fundUpdateList.forEach { transaction.update(it.ref, "remaining_amount", it.newRemainingAmount) }
+
             }.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     result(UIState.Success("EXPENSE"))
                     Log.d("EXPENSE", "Successfully added expense")
                 } else {
-                    result(UIState.Error("Failed to add expense. " + task.exception?.message.toString()))
-                    Log.e("EXPENSE", "Failed to add expense. " + task.exception?.message.toString())
+                    result(UIState.Error("Failed to add expense. ${task.exception?.message}"))
+                    Log.e("EXPENSE", "Failed to add expense. ${task.exception?.message}")
                 }
             }
         } catch (e: Exception) {

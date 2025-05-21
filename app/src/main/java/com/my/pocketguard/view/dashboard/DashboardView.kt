@@ -5,8 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +40,8 @@ fun DashboardView(navController: NavController) {
     val currentUser = viewModel.currentUser.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
     val expenses by viewModel.expenseList.collectAsState()
+    val category by viewModel.categoryList.collectAsState()
+    val fund by viewModel.fundList.collectAsState()
     val fundSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val categorySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showFundSheet = remember { mutableStateOf(false) }
@@ -44,17 +49,17 @@ fun DashboardView(navController: NavController) {
 
 
     LaunchedEffect(uiState) {
-        when (uiState) {
+        isLoading = when (uiState) {
             is UIState.Error -> {
-                isLoading = false
+                false
             }
 
             is UIState.Loading -> {
-                isLoading = true
+                true
             }
 
             is UIState.Success -> {
-                isLoading = false
+                false
             }
         }
     }
@@ -92,11 +97,22 @@ fun DashboardView(navController: NavController) {
                 .padding(it)
         ) {
             Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    ExpenseList(expenses)
+                ExpenseList(expenses)
+                LazyRow {
+                    items(category) {
+                        Column {
+                            Text(it.amount.toString())
+                            Text(it.title)
+                        }
+                    }
+                }
+                LazyRow {
+                    items(fund) {
+                        Column {
+                            Text(it.amount.toString())
+                            Text(it.title)
+                        }
+                    }
                 }
             }
         }

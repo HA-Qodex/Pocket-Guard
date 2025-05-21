@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.Timestamp
 import com.my.pocketguard.model.CategoryModel
+import com.my.pocketguard.model.Expense
 import com.my.pocketguard.model.FundModel
 import com.my.pocketguard.repository.ExpenseRepository
 import com.my.pocketguard.util.UIState
@@ -29,19 +30,11 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
     }
 
     fun storeExpense(
-        date: Timestamp,
-        amount: Long,
-        title: String,
-        categoryId: String,
-        fundId: String
+        expenseList: List<Expense>
     ) {
         viewModelScope.launch {
             expenseRepository.storeExpense(
-                date,
-                amount,
-                title,
-                categoryId,
-                fundId
+                expenseList
             )
         }
     }

@@ -3,6 +3,7 @@ package com.my.pocketguard.repository
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.my.pocketguard.model.CategoryModel
+import com.my.pocketguard.model.Expense
 import com.my.pocketguard.model.FundModel
 import com.my.pocketguard.services.FirestoreService
 import com.my.pocketguard.util.UIState
@@ -48,22 +49,10 @@ class ExpenseRepository @Inject constructor(
     }
 
     fun storeExpense(
-        date: Timestamp,
-        amount: Long,
-        title: String,
-        categoryId: String,
-        fundId: String
+        expenseList: List<Expense>
     ) {
-        val uid = UUID.randomUUID().toString()
-        val expenseData = hashMapOf(
-            "id" to uid,
-            "date" to date,
-            "amount" to amount,
-            "title" to title.trim(),
-            "created_at" to FieldValue.serverTimestamp()
-        )
         _uiState.value = UIState.Loading
-        firestoreService.storeExpense(categoryId, fundId, expenseData) { uiState ->
+        firestoreService.storeExpense(expenseList) { uiState ->
             _uiState.value = uiState
         }
     }
