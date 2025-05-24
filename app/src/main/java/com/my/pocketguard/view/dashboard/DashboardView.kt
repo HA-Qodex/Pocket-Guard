@@ -3,13 +3,9 @@ package com.my.pocketguard.view.dashboard
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,16 +14,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.himanshoe.charty.common.ChartColor
+import com.himanshoe.charty.pie.model.PieChartData
 import com.my.pocketguard.component.CategoryBottomSheet
+import com.my.pocketguard.component.CategoryChart
 import com.my.pocketguard.component.CustomLoader
 import com.my.pocketguard.component.DashboardAppBar
 import com.my.pocketguard.component.FundBottomSheet
 import com.my.pocketguard.navigation.AppRoutes
+import com.my.pocketguard.ui.theme.ChartColors
 import com.my.pocketguard.ui.theme.PrimaryColorLite
+import com.my.pocketguard.ui.theme.TextColor
 import com.my.pocketguard.util.UIState
 import com.my.pocketguard.viewmodel.DashboardViewModel
 
@@ -40,7 +42,7 @@ fun DashboardView(navController: NavController) {
     val currentUser = viewModel.currentUser.collectAsState()
     var isLoading by remember { mutableStateOf(false) }
     val expenses by viewModel.expenseList.collectAsState()
-    val category by viewModel.categoryList.collectAsState()
+    val categories by viewModel.categoryList.collectAsState()
     val fund by viewModel.fundList.collectAsState()
     val fundSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val categorySheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -96,24 +98,19 @@ fun DashboardView(navController: NavController) {
                 .fillMaxSize()
                 .padding(it)
         ) {
-            Column {
+            Column(
+            ) {
                 ExpenseList(expenses)
-                LazyRow {
-                    items(category) {
-                        Column {
-                            Text(it.amount.toString())
-                            Text(it.title)
-                        }
-                    }
-                }
-                LazyRow {
-                    items(fund) {
-                        Column {
-                            Text(it.amount.toString())
-                            Text(it.title)
-                        }
-                    }
-                }
+                CategoryChart(data = categories.mapIndexed { index, category ->
+                    PieChartData(
+                        label = category.title.replaceFirstChar { it.uppercase() },
+                        value = category.amount.toFloat(),
+                        color = ChartColor.Solid(
+                            ChartColors[index]
+                        ),
+                        labelColor = ChartColor.Solid(TextColor)
+                    )
+                }.toList())
             }
         }
     }

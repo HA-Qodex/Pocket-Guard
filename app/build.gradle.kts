@@ -87,6 +87,8 @@ dependencies {
     implementation(libs.coil.compose)
     // Permission Handler
     implementation(libs.accompanist.permissions)
+    // Chart
+    implementation(libs.charty)
 }
 
 // Allow references to generated code

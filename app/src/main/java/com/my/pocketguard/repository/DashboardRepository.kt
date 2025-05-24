@@ -84,6 +84,7 @@ class DashboardRepository @Inject constructor(
                 _uiState.value = UIState.Success()
             }
         } catch (e: Exception) {
+            Log.e("ANALYTICS", e.message.toString(), )
             _uiState.value = UIState.Error(e.message.toString())
         }
     }

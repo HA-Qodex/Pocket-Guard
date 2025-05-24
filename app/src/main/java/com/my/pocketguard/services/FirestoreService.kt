@@ -208,7 +208,7 @@ class FirestoreService @Inject constructor(
             .whereEqualTo("created_by", userRef)
             .whereGreaterThanOrEqualTo("date", Timestamp(getCurrentMonthStartAndEnd().first / 1000, 0))
             .whereLessThan("date", Timestamp(getCurrentMonthStartAndEnd().second / 1000, 0))
-            .orderBy("created_at", Query.Direction.DESCENDING)
+            .orderBy("amount", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     close(error)
