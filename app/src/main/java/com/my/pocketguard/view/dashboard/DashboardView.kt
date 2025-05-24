@@ -100,7 +100,6 @@ fun DashboardView(navController: NavController) {
         ) {
             Column(
             ) {
-                ExpenseList(expenses)
                 CategoryChart(data = categories.mapIndexed { index, category ->
                     PieChartData(
                         label = category.title.replaceFirstChar { it.uppercase() },
@@ -111,6 +110,7 @@ fun DashboardView(navController: NavController) {
                         labelColor = ChartColor.Solid(TextColor)
                     )
                 }.toList())
+                ExpenseList(expenses)
             }
         }
     }

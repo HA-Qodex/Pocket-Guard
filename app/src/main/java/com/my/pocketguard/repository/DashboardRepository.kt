@@ -62,7 +62,7 @@ class DashboardRepository @Inject constructor(
         _uiState.value = UIState.Loading
         try {
             firestoreService.fetchExpenseAnalytics().collect { expenses ->
-                _categoryList.emit(expenses.groupBy { expense ->
+                _categoryList.emit(expenses.sortedByDescending { data -> data.amount }.groupBy { expense ->
                     expense.category
                 }.map { (category, data) ->
                     AnalyticsModel(
