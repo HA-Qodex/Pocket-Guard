@@ -34,7 +34,7 @@ class ExpenseViewModel @Inject constructor(private val expenseRepository: Expens
     ) {
         viewModelScope.launch {
             expenseRepository.storeExpense(
-                expenseList
+                expenseList.groupBy { it.fund?.id.toString() }
             )
         }
     }

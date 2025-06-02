@@ -1,6 +1,7 @@
 package com.my.pocketguard.repository
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FieldValue
 import com.my.pocketguard.model.CategoryModel
 import com.my.pocketguard.model.Expense
@@ -49,7 +50,7 @@ class ExpenseRepository @Inject constructor(
     }
 
     fun storeExpense(
-        expenseList: List<Expense>
+        expenseList: Map<String, List<Expense>>
     ) {
         _uiState.value = UIState.Loading
         firestoreService.storeExpense(expenseList) { uiState ->

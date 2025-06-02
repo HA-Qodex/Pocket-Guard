@@ -261,7 +261,7 @@ class FirestoreService @Inject constructor(
     }
 
     fun storeExpense(
-        expenseList: List<Expense>,
+        expenseList: Map<String, List<Expense>>,
         result: (UIState) -> Unit
     ) {
         try {
@@ -280,40 +280,43 @@ class FirestoreService @Inject constructor(
 
             store.runTransaction { transaction ->
 
-                expenseList.forEach { expense ->
-                    val expenseId = expense.id ?: throw Exception("Missing expense ID")
-                    val categoryId = expense.category?.id ?: throw Exception("Missing category ID")
-                    val fundId = expense.fund?.id ?: throw Exception("Missing fund ID")
-                    val amount = (expense.amount as? Number)?.toLong()
-                        ?: throw Exception("Invalid amount for expense: $expenseId")
-
-                    val expenseRef = store.collection("expenses").document(expenseId)
-                    val categoryRef = store.collection("categories").document(categoryId)
+                expenseList.forEach { (fundId, expenses) ->
                     val fundRef = store.collection("funds").document(fundId)
-
-                    val remainingAmount = (transaction.get(fundRef).get("remaining_amount") as? Number)?.toLong()
+                    var remainingAmount = (transaction.get(fundRef).get("remaining_amount") as? Number)?.toLong()
                         ?: throw Exception("Missing or invalid remaining amount for fund: $fundId")
 
-                    if (amount > remainingAmount) {
-                        throw FirebaseFirestoreException(
-                            "Insufficient fund for expense '${expense.title ?: ""}'",
-                            FirebaseFirestoreException.Code.ABORTED
-                        ) as Throwable
+                    expenses.forEach { expense ->
+                        val expenseId = expense.id ?: throw Exception("Missing expense ID")
+                        val categoryId = expense.category?.id ?: throw Exception("Missing category ID")
+                        val amount = (expense.amount as? Number)?.toLong()
+                            ?: throw Exception("Invalid amount for expense: $expenseId")
+
+                        val expenseRef = store.collection("expenses").document(expenseId)
+                        val categoryRef = store.collection("categories").document(categoryId)
+
+                        if (amount > remainingAmount) {
+                            throw FirebaseFirestoreException(
+                                "Insufficient fund for expense '${expense.title ?: ""}'",
+                                FirebaseFirestoreException.Code.ABORTED
+                            ) as Throwable
+                        } else {
+                            remainingAmount -= amount
+                        }
+
+                        val expenseData = mapOf(
+                            "id" to expenseId,
+                            "date" to expense.date,
+                            "amount" to amount,
+                            "title" to (expense.title?.trim() ?: ""),
+                            "created_at" to FieldValue.serverTimestamp(),
+                            "created_by" to userRef,
+                            "category_ref" to categoryRef,
+                            "fund_ref" to fundRef
+                        )
+
+                        expenseWriteList.add(ExpenseWriteData(expenseRef, expenseData))
+                        fundUpdateList.add(FundUpdateData(fundRef, remainingAmount))
                     }
-
-                    val expenseData = mapOf(
-                        "id" to expenseId,
-                        "date" to expense.date,
-                        "amount" to amount,
-                        "title" to (expense.title?.trim() ?: ""),
-                        "created_at" to FieldValue.serverTimestamp(),
-                        "created_by" to userRef,
-                        "category_ref" to categoryRef,
-                        "fund_ref" to fundRef
-                    )
-
-                    expenseWriteList.add(ExpenseWriteData(expenseRef, expenseData))
-                    fundUpdateList.add(FundUpdateData(fundRef, remainingAmount - amount))
                 }
 
                 expenseWriteList.forEach { transaction.set(it.ref, it.data) }
